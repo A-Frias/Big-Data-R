@@ -1,0 +1,457 @@
+---
+title: "U03 Ejercicio 01"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+En este ejercicio vamos a analizar los datos meteorológicos de 6 estaciones situadas en algunas ciudades españolas.
+Los datos se han obtenido a partir del paquete weatherData. 
+Se trata de datos a nivel diarío y recogen las siguientes variables:
+
+
+- estacion: localización de la estación
+- id_estacion: código abreviado de la estación
+- Date: fecha                
+- Max_TemperatureC: temperatuta máxima diaria
+- Mean_TemperatureC: temperatura media diaria
+- Min_TemperatureC: temperatura máxima diaria
+- Max_Wind_SpeedKm_h: velocidad del viento máxima diaria
+- Mean_Wind_SpeedKm_h: velocidad del viento media diaria
+- WindDirDegrees: dirección del viento promedio diaria
+- Precipitationmm: Precipitación en mm de altura (es equivalente a l/$m^2$ )
+- CloudCover: Grado de copertura del cielo (escala 1:8)
+- Mean_Humidity: Humedad media (%)
+- Events: cadena textual con los eventos meteorológicos ocurridos, separados por guiones
+- Fog: niebla, TRUE/FALSE
+- Hail: granizo, TRUE/FALSE
+- Rain: lluvia, TRUE/FALSE
+- Snow: nieve, TRUE/FALSE
+- Thunderstorm: tormenta, TRUE/FALSE
+- Tornado: tornado, TRUE/FALSE
+
+Para cargar los datos hacemos lo siguiente:
+
+```{r, message=FALSE, warning=FALSE}
+library(reshape2)
+library(tidyverse)
+# Comprueba la localización de los ficheros en tu ordenador y adapta la ruta si es necesario
+#estaciones <- read.delim("../../Datasets/estaciones_meteo.txt",sep="\t")
+#estaciones <- estaciones %>%  filter(estacion %in% c("MADRID","BARCELONA","SEVILLA","ZARAGOZA","BILBAO","VIGO"))
+# meteo_data <- read.delim("../../Datasets/meteo_data.csv",sep=";",stringsAsFactors = FALSE)
+#meteo_data <- meteo_data %>% mutate(Date=as.Date(Date)) 
+#meteo_data <- meteo_data %>% filter(estacion  %in% estaciones$estacion) 
+```
+
+Veamos un resumen de lo que contienen estos datos
+
+```{r}
+summary(meteo_data)
+```
+
+# Distribución de frecuencias
+
+En primer lugar vamos a estudiar las distribuciones de frecuencia
+
+Para la estación de Zaragoza y la variable Mean_TemperatureC, dibuja un histograma. Fija la anchura de las categorías a un grado centígrado. 
+
+```{r}
+est="ZARAGOZA"
+meteo_data %>% filter(estacion==est) %>% 
+  ggplot() + geom_histogram(aes(Mean_TemperatureC),binwidth = 1)
+```
+
+Ahora dibuja de forma conjunta los histogramas para la variable Mean_TemperatureC
+(Pista si dibujas el histograma con ggplot usa position="identity": geom_histogram(aes(...),position="identity"))
+
+```{r}
+var="Mean_TemperatureC"
+
+meteo_data %>% 
+  ggplot() + geom_histogram(aes_string(var,color="estacion"),position = "identity",fill=NA,binwidth = 2.5) +
+    scale_color_brewer(palette = "Set1")
+
+```
+
+¿Observas la diferencia entre las distribuciones en las diferentes estaciones? 
+Para poder apreciar mejor las diferencias entre estaciones, representa el mismo gráfico pero:
+- usando polígonos de frecuencias (geom_freqpoly())
+- usando  densidades de frecuencia ajustadas (geom_density())
+
+```{r}
+meteo_data %>% 
+  ggplot() + geom_freqpoly(aes(Mean_TemperatureC,color=estacion)) +
+    scale_color_brewer(palette = "Set1")
+  
+```
+
+
+```{r}
+meteo_data %>% 
+  ggplot() + geom_density(aes(Mean_TemperatureC,color=estacion)) +
+    scale_color_brewer(palette = "Set1")
+  
+```
+
+Mucho mejor, ¿verdad? 
+
+Ahora, dibujemos las densidades para la variable  Precipitationmm
+
+```{r}
+
+meteo_data %>% 
+  ggplot() + geom_histogram(aes(Precipitationmm,color=estacion),position = "identity",fill=NA,binwidth = 2.5) +
+    scale_color_brewer(palette = "Set1")
+```
+
+Las distribuciones de precipitación están muy concentradas en el 0, días sin lluvia, y luego presentan una cola bastante extensa. 
+Se visualizaría mejor usando escala logarítmica para el eje x
+
+(Consejo, como el logaritmo de 0 no está definido, es mejor que añadas a la variable Precipitationmm un número pequeño, digamos 0.01 )
+
+```{r}
+meteo_data %>% mutate(Precipitationmm = Precipitationmm +0.01) %>% #Para poder ver el 0 en esa escala
+  ggplot() + geom_density(aes(Precipitationmm,color=estacion)) +
+    scale_color_brewer(palette = "Set1") + scale_x_log10()
+```
+
+
+## Gráficos con varias variables - facets
+
+¿Puedes dibujar las distribuciones de varias variables en un solo gráfico?
+
+Si, usando facets
+
+Para que el gráfico sea interpretable usa solo las variables Mean_TemperatureC, Mean_Wind_SpeedKm_h,WindDirDegrees,
+Precipitationmm ,CloudCover ,Mean_Humidity
+
+Para ello conviene primero transformar los datos a formato long mediante la función melt del paquete reshape2
+
+```{r, warning=FALSE}
+meteo_long <- melt(meteo_data,id=c("estacion","Date"),
+                   measure.vars = c("Mean_TemperatureC","Mean_Wind_SpeedKm_h","WindDirDegrees",
+                                    "Precipitationmm","CloudCover","Mean_Humidity"))
+meteo_long %>% 
+  ggplot() + geom_density(aes(value,color=estacion)) + facet_wrap(~variable,scales = "free") +
+  scale_color_brewer(palette = "Set1")
+
+```
+
+
+## Boxplots
+
+Otra forma de representar las distribuciones de una variable, más simplificada, pero más apropiada para la comparación, es el boxplot.
+
+Dibuja un boxplot que el eje x presente las estaciones y en el eje y las distribuciones de la variable Max_TemperatureC.
+
+```{r}
+meteo_data %>% 
+  ggplot() + geom_boxplot(aes(estacion,Max_TemperatureC))
+```
+
+
+Ahora dibuja un gráfico con facets para ver los boxplots de las diferentes variables
+
+```{r, message=FALSE, warning=FALSE}
+
+meteo_long %>% 
+  ggplot() + geom_boxplot(aes(estacion, value,color=estacion)) + facet_wrap(~variable,scales = "free") +
+  scale_color_brewer(palette = "Set1") + theme(legend.position = 'none',axis.text.x = element_text(angle=90))
+
+```
+
+## Variables categóricas
+
+En el conjunto de datos meteorológicos, tenemos también una serie de variables categóricas que nos dicen si en un día determinado se ha producido un determinado fenómeno (lluvia, nieve, tormenta, etc)
+
+¿Cual es la estación con más eventos de lluvia?
+
+```{r}
+table(meteo_data$estacion,meteo_data$Rain)
+```
+
+No te parece que alguna ciudad tiene más días de lluvia que lo que sugiere la variable Precipitationmm
+Cuenta para cada estación el número de días con precipitación mayor que 0
+
+```{r}
+table(meteo_data$estacion,meteo_data$Precipitationmm>0)
+```
+
+Efectivamente, parece que para alguna ciudad han contado más dias lluviosos de la cuenta. 
+
+
+
+¿Y de niebla?
+
+```{r}
+# Hagamoslo de una manera diferente
+meteo_data %>%  group_by(estacion,Fog) %>% summarise(num=n())
+# Equivalente a 
+# meteo_data %>%  count(estacion,Fog)
+```
+
+
+¿Eres capaz de mostrar los conteos de todas estas variables en un solo gráfico?
+
+```{r}
+# Recuerda siempre promero convertir los datos a tipo long
+meteo_cat <- melt(meteo_data,id=c("estacion","Date"),
+                   measure.vars = c("Fog","Hail","Rain","Snow","Thunderstorm","Tornado"))
+
+meteo_cat %>% 
+  ggplot() + geom_bar(aes(value,fill=estacion),position="dodge") + facet_wrap(~variable,scales = "free") +
+  scale_fill_brewer(palette = "Set1") 
+
+meteo_cat %>% 
+  ggplot() + geom_bar(aes(value,fill=value)) + facet_grid(variable~estacion,scales = "free") +
+   theme(legend.position = 'none')
+  
+```
+
+# Medidas de posicion
+
+## Comparación media,mediana, media truncada
+
+Calcula la media, la mediana y la media truncada para cada estación de la variable Mean_Wind_SpeedKm_h
+
+```{r}
+meteo_data %>% group_by(estacion) %>% 
+  summarise(mean=mean(Mean_Wind_SpeedKm_h),med=median(Mean_Wind_SpeedKm_h),trimmean=mean(Mean_Wind_SpeedKm_h,trim=0.1))
+```
+
+
+Ahora hazlo en un solo paso para las variables Mean_TemperatureC, Mean_Wind_SpeedKm_h, WindDirDegrees,
+Precipitationmm ,CloudCover ,Mean_Humidity 
+
+(Pista: Puedes usar la transformación a datos long que has hecho en el ejercicio 1 de la unidad)
+
+```{r}
+medias <- meteo_long %>% group_by(estacion,variable) %>% 
+  summarise(mean=mean(value,na.rm=TRUE),median=median(value,na.rm=TRUE),trimmean=mean(value,trim=0.1,na.rm=TRUE))
+medias 
+```
+
+¿Puedes hacerlo también sin transformar los datos a tipo long? 
+
+(Pista: usa la función summarise_each)
+
+```{r}
+mediasw <- meteo_data %>%  group_by(estacion) %>% 
+  summarise_each(funs(mean=mean(.,na.rm=TRUE),median=median(.,na.rm=TRUE),trimmean=mean(.,trim=0.1,na.rm=TRUE)),
+                 Max_TemperatureC:Mean_Humidity)
+mediasw
+
+# Otra forma muy parecida
+# meteo_data %>%  group_by(estacion) %>% 
+#   summarise_at(vars(Max_TemperatureC:Mean_Humidity),
+#           funs(mean=mean(.,na.rm=TRUE),median=median(.,na.rm=TRUE),trimmean=mean(.,trim=0.1,na.rm=TRUE)))
+```
+
+
+Selecciona del resultado anterior solo las medias normales de las variables temperatura.
+
+Pista: Usa la funcion matches dentro de select
+
+```{r}
+mediasw %>% select(estacion,matches("Temper(.*)_mean"))
+```
+
+
+Ahora representa los resultados de forma gráfica.
+
+```{r}
+ggplot(melt(medias,id=c("estacion","variable"),variable.name="medida")) + 
+    geom_point(aes(estacion,value,color=medida)) + 
+    geom_line(aes(estacion,value,color=medida,group=medida)) +
+    facet_wrap(~variable,scales="free") + theme(axis.text.x = element_text(angle=90))
+
+```
+
+- Se observa que para las varibles con distribuciones simétricas como la nubosidad o la humedad las tres medidas difieren muy poco en todas las estaciones. 
+- En cambio para distribuciones muy asímetricas como la precipitación o la velecidad del viento hay bastante diferencia
+
+
+### Medias de ángulos (Para alumnos Top)
+
+Los ángulos son tipo de variable especial, ya que son ciclícos, es decir están limitados a 360º y la distancia entre ellos no se calcula de forma convencional. La distancia entre un ángulo de 2º y 358º no es 356º sino 4º. 
+Para calcular su media debe hacerse de forma vectorial. ¿Se te ocurre como hacerlo?
+
+```{r}
+medias_ang <- meteo_data %>% group_by(estacion) %>% 
+  summarise(mean=180*atan2(mean(sin(pi*WindDirDegrees/180)),mean(cos(pi*WindDirDegrees/180)))/pi,
+            median=180*atan2(median(sin(pi*WindDirDegrees/180)),median(cos(pi*WindDirDegrees/180)))/pi,
+            trimmean=180*atan2(mean(sin(pi*WindDirDegrees/180),trim=0.1),
+                               mean(cos(pi*WindDirDegrees/180),trim=0.1))/pi)
+
+medias_ang
+
+# La funcion atan2 devuelve ángulos en [-180,180]. Para que sean en [0,360]
+medias_ang <- medias_ang %>% group_by(estacion) %>% mutate_each(funs(f360=(.+360)%% 360))
+
+medias_ang
+```
+
+
+# Medidas de dispersión
+
+Calculemos la dispersión de las diferentes variables, por estación. Para ello calcularemos tres medidas distintas:
+
+- Desviación típica
+- Rango intercuártilico (IQR)
+
+
+Calculalos para cada estación para la variable Precipitacionmm
+
+```{r}
+meteo_data %>% group_by(estacion) %>% 
+  summarise(sd=sd(Precipitationmm,na.rm=TRUE),iqr=IQR(Precipitationmm,na.rm=TRUE))
+```
+
+Calcula para las variables Mean_TemperatureC, Mean_Wind_SpeedKm_h,WindDirDegrees,
+Precipitationmm ,CloudCover ,Mean_Humidity en un solo paso
+
+```{r}
+dispersion <- meteo_long %>% group_by(estacion,variable) %>% 
+  summarise(sd=sd(value,na.rm=TRUE),iqr=IQR(value,na.rm=TRUE))
+dispersion
+```
+
+
+Muestra los resultados en una sola  gráfica
+
+```{r}
+# Escalamos el IQR para que coincida en magnitud con la mad y la sd si la distribución es normal
+
+dispersion %>% mutate(iqr=iqr/1.34898) %>% 
+melt(id=c("estacion","variable"),variable.name="medida") %>% 
+ggplot() + 
+    geom_point(aes(estacion,value,color=medida)) + 
+    geom_line(aes(estacion,value,color=medida,group=medida)) +
+    facet_wrap(~variable,scales="free") + theme(axis.text.x = element_text(angle=90))
+
+```
+
+Observa los valores de la dispersión en temperaturas. Los valores más altos indican una mayor diferencia entre temperaturas en verano e invierno. Esto se da en las estaciones con clima más continental como Madrid o Zaragoza. 
+
+
+## Cuantiles y boxplots personalizados
+
+Paralas variables de tipo numérico que has utilizado antes, calcula los cuantiles 0.05,0.25,0.5,0.75 y 0.95.
+Calcula también calculamos la media y la desviación típica
+
+```{r}
+# te puede ser util esta función
+seven_nums <- function(x,p=c(0,0.05,0.25,0.5,0.75,0.95,1)){
+  q=quantile(x,p,na.rm=TRUE)
+  res =data.frame(num=length(x),m=mean(x,na.rm=TRUE),sd=sd(x,na.rm=TRUE),t(q))
+  # cambio el nombre a los cuantiles
+  names(res)[-(1:3)] =paste0("q",round(p*100))
+  res
+}
+
+cuants <- meteo_long %>% group_by(estacion,variable) %>% do(seven_nums(.$value))
+cuants
+```
+
+Esta informacíon puede mostrarse en un solo gráfico. ¿Se te ocurre como?
+
+(Pista: puedes usar un boxplot personalizado para mostrar los cuantiles, puntos para la media y una barra de error para la sd)
+
+```{r}
+ggplot(cuants) + 
+  geom_boxplot(aes(x=estacion,ymin=q5,lower=q25,middle=q50,upper=q75,ymax=q95),stat="identity") +
+  geom_pointrange(aes(estacion,y=m,ymin=m-sd,ymax=m+sd),color="red") + 
+  facet_wrap(~variable,scales="free") + theme(axis.text.x = element_text(angle = 45))
+```
+
+# Forma de las distribuciones
+
+Calcula ahora diversas medidas de forma en el mismo data frame:
+- Coeficiente de variación
+- Skewness
+- Kurtosis
+
+
+```{r}
+library(e1071)
+forma<- meteo_long %>% group_by(estacion,variable) %>% 
+  summarise(m=mean(value,na.rm=TRUE),sd=sd(value,na.rm=TRUE),cv=sd/abs(m),sk=skewness(value,na.rm=TRUE),k=kurtosis(value,na.rm=TRUE))
+forma
+```
+
+Veamos el resultado de forma gŕafica para una medida, por ejemplo el coeficiente de variación (cv)
+
+```{r}
+# cv
+ggplot(forma) + geom_bar(aes(estacion,cv),stat="identity", fill="red",alpha=0.5) + 
+  geom_text(aes(estacion,0.8*cv, label=round(cv,2)),size=3,stat="identity") +
+  facet_wrap(~variable) + theme(axis.text.x=element_text(angle=90))
+```
+
+Ahora, esto ya es de alumnos top, muestra todas las medidas para todas las estaciones y variables  en una única gráfica
+
+```{r}
+# Todo a la vez - Usemos melt otra vez
+melt(forma,id=c("estacion","variable"),variable.name="medida") %>% 
+ggplot() + 
+  geom_bar(aes(estacion,value,fill=variable),stat="identity",alpha=0.5) + 
+  geom_text(aes(estacion,0.8*value, label=round(value,2)),size=2.5) +
+  facet_wrap(~paste(variable,"-",medida),scales="free",ncol=5) + 
+  theme(legend.position='none',strip.text = element_text(color='blue',size=6))
+```
+
+# Correlación
+
+Calcula la matriz de correlación entre las variables numéricas para la estación de Barcelona
+
+```{r}
+tmp<- meteo_data %>% filter(estacion=="BARCELONA")
+cor(tmp[4:12],use='complete')
+```
+
+Responde a las siguientes preguntas: 
+
+¿Como cambia la temperatura cuando la nubosidad aumenta?
+¿Con que temperatura correlaciona más con la máxima, mínima o media?
+¿Que influye más en la copertura del cielo la humedad o el viento? ¿En el mismo sentido?
+
+
+Representala la matriz de correlación gráficamente mediante la función ggpairs del paquete GGally
+
+```{r, message=FALSE, warning=FALSE}
+library(GGally)
+meteo_data %>% filter(estacion=="BARCELONA") %>% 
+ggpairs(columns = 4:12)
+```
+
+
+
+
+Mediante ggpairs podemos representar la matriz de correlación para todas las estaciones a la vez, calculando tambien por separado las correlaciones para cada estación. 
+Prueba a hacerlo usando ggpairs sobre los datos completos y añadiendo el argumento mapping = aes(color=estacion)
+
+```{r, message=FALSE, warning=FALSE,fig.width=12}
+library(GGally)
+ggpairs(meteo_data,mapping = aes(color=estacion),columns = 4:12)
+```
+
+Como extra, otras formas de calcular y visualizar la matriz de correlación:
+
+
+Si solo estamos interesados en los valores numéricos
+
+```{r}
+corw <- meteo_data %>%  group_by(estacion) %>% do(corm={
+  df<- as.data.frame(cor(.[4:12],use="complete"))
+  cbind(variable1=row.names(df),df)
+  }) %>% ungroup() %>%  unnest()
+
+corw
+```
+
+
+
+
+
+
+

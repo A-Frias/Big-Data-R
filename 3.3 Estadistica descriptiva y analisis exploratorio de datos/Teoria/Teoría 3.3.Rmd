@@ -1,0 +1,1117 @@
+---
+title: 'Estadística Descriptiva'
+author: 'MasterD'
+output:
+  pdf_document:
+    toc: yes
+  html_document:
+    highlight: tango
+    theme: united
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: no
+  revealjs::revealjs_presentation:
+    center: yes
+    css: style.css
+    highlight: pygments
+    theme: sky
+  word_document:
+    reference_docx: www/plantillaMasterD_basica5.docx
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(width=100)
+
+wdir= getwd()
+
+library(reshape2)
+library(dplyr)
+library(ggplot2)
+#install.packages(contrib.url)
+```
+
+# Tu reto en esta unidad
+
+En muchas situaciones cotidianas nos encontramos con información en forma de medidas estadísticas. Veamos algún ejemplo e intenta responder a las preguntas:
+
+- Leemos en la prensa: la tasa de paro se sitúa en el 18.5 % según la última encuesta de población activa. ¿Cómo se calcula exactamente esa tasa?
+- El bebé come muy bien, está en el percentil 90 de peso. ¿Qué significa eso?
+- La desigualdad en la distribución de la riqueza crece año tras año. ¿Cómo se mide cuantitativamente la desigualdad?
+- El salario medio en España es de 24000 Euros anuales  mientras que el salario mediano se sitúa en 16000 euros anuales. ¿Qué diferencia hay entre el salario medio y el salario mediano? ¿Por qué son tan distintos?
+
+No te preocupes si no has sabido responder correctamente a las preguntas. Al final de la unidad serás capaz de responderlas y explicárselo a cualquiera que tenga dudas. 
+
+# Introducción
+
+La definición de estadística según el diccionario de la Real Academia es:
+
+1. Estudio de los datos cuantitativos de la población, de los recursos naturales e industriales, del tráfico o de cualquier otra manifestación de las sociedades humanas.
+
+2. Rama de la matemática que utiliza grandes conjuntos de datos numéricos para obtener inferencias basadas en el cálculo de probabilidades.
+
+Las dos definiciones se corresponden con las dos ramas principales de la estadística: la estadística descriptiva y la estadística inferencial. En esta unidad nos vamos a centrar en la primera.
+
+
+
+![Áreas de trabajo de la estadística](img/workflow_statistics.png)
+
+## Estadística Descriptiva y Análisis Exploratorio de Datos
+
+La *estadística descriptiva* tiene por misión recolectar, presentar y caracterizar un conjunto de datos con el fin de describir apropiadamente las diversas características de ese conjunto.
+
+Aprenderemos un conjunto de técnicas que permiten:
+
+- Obtener, tabular, presentar, resumir y deducir propiedades del conjunto de datos en estudio
+- Representarlos gráficamente de forma adecuada para descubrir sus propiedades y relaciones.
+
+
+El conjunto de técnicas para explorar los datos de forma sistemática es lo que los estadísticos llaman 
+**Análisis Exploratorio de datos** (EDA por sus siglas en inglés). El análisis exploratorio no sigue unas reglas fijas, en realidad
+consiste en hacerse preguntas y buscar respuestas mediante visualizaciones, transformaciones, métricas y pequeños modelos.  
+Normalmente estas respuestas nos hacen refinar las preguntas o hacernos nuevas preguntas.
+
+El EDA es una parte importante del análisis de datos, incluso cuando las preguntas están claras desde el principio, ya que siempre va a ser necesario para explorar la calidad de los datos y proceder a su limpieza. 
+
+En resumen, el análisis exploratorio de datos es el primer paso, y el más crucial, a la hora de analizar unos datos.  Antes de hacer inferencias/predicciones es esencial conocer y examinar nuestras  variables para entre otras cosas:
+
+- Encontrar errores
+- Encontrar valores anómalos
+- Ver patrones en los datos
+- Generar hipótesis
+- Encontrar violaciones a las suposiciones estadísticas 
+- ...  y porque si no luego tendremos problemas 
+
+
+## Algunas definiciones básicas
+
+
+- **Población** es el conjunto de elementos, individuos o entes del que se pretende estudiar una serie de características o comportamientos. 
+- **Individuo** es cada uno de los elementos de la población y en Estadística el término puede referirse a cosas tan diversas como personas, provincias, empresas, edificios, etc. También se denomina observación.  
+- **Censo** es la información recogida para el estudio de una característica en todos los individuos de una población.
+- **Muestra** es un subconjunto de elementos de la población, seleccionado para llevar a cabo un estudio estadístico sobre una o varias variables.  Motivos tales como la  economía, rapidez, calidad, imposibilidad o la observación destructiva hacen habitual el estudio de las características de una población a través de muestras.
+
+
+## Tipos de Dato
+
+Una **variable** es una característica de los individuos de una población que nos interesa estudiar. Por ejemplo si estamos estudiando una población de personas: la altura, la edad, el color de piel, el peso, la presión arterial, o el grupo sanguíneo. Si nuestra población es el conjunto de hipotecas concedidas por un banco, las variables serán el capital del préstamo, el tipo de interés, el tipo de inmueble hipotecado, etc.  
+
+**Dato** es el conjunto de valores en bruto que toma variable. 
+
+Podemos clasificar las variables según el tipo de datos que recogen como:
+
+- **Cualitativas**: son aquellas en la que los valores posibles no expresan una cantidad sino la clasificación del dato en una categoría. Por ejemplo: color de ojos, el lugar de nacimiento, el género, el código postal (aunque sea un número) o una respuesta binaria a una pregunta tipo Si/No o Verdadero/Falso. 
+Las variables cualitativas pueden diferenciarse en:
+    - *Variable cualitativa ordinal*: La variable puede tomar distintos valores ordenados siguiendo una escala establecida, aunque no es necesario que el intervalo entre mediciones sea uniforme, por ejemplo: bajo, medio, alto.
+    - *Variable cualitativa nominal*: En esta variable los valores no pueden ser sometidos a un criterio de orden, como por ejemplo el color de pelo.
+
+- **Cuantitativas**: aquellas cuyo resultado es un número. A su vez, las hay de dos tipos:
+    - *Cuantitativas discretas*: cuando se toman valores aislados, normalmente resultados de conteos. Por ejemplo número de hermanos, número de empleados de una empresa o los puntos anotados por un jugador de baloncesto.  
+    - *Cuantitativas continuas*: cuando, entre dos valores cualesquiera, puede haber valores intermedios. Es decir, se toman todos los valores de un determinado intervalo. Por ejemplo: la altura de una persona, la temperatura en un instante temporal o el precio de un producto. 
+
+    
+![](img/tiposdevariables.png)
+
+
+Las características a estudiar en un conjunto de datos pueden ser muy distintas y es importante conocer qué tipo de variables estamos manejando porque las técnicas estadísticas a utilizar dependerán de ello y por tanto la validez de las conclusiones que se extraigan de su análisis.
+
+
+## Datos ejemplos
+
+Como siempre vamos a ilustrar todos los conceptos a partir de ejemplos basados en datos reales. En esta unidad vamos a utilizar datos de:
+
+- Encuesta Estructura Salarial (Instituto Nacional de Estadística)
+- EPA: Encuesta de Población Activa (Instituto Nacional de Estadística)
+- Datos antropométricos: altura, peso, perímetro torácico, perímetro de muñeca, etc.
+
+### Encuesta de Población Activa (EPA)
+
+Fuente: Instituto Nacional de Estadística <http://www.ine.es/dyngs/INEbase/es/operacion.htm?c=Estadistica_C&cid=1254736176918&menu=resultados&idp=1254735976595>
+
+En R podemos cargar los microdatos de la encuesta, es decir las respuestas detalladas de cada participante, usando el paquete MicroDatosEs.
+
+```{r,cache=TRUE}
+# Si no tienes instalado el paquete instalalo 
+install.packages('MicroDatosEs')
+
+epa <- MicroDatosEs::epa2005("~/Formacion informatica/R/Proyectos/Master BD/3 Ciencia de datos con R/Datasets/ine/EPAWEBT0416")
+epa <- as.data.frame(epa)
+
+#ccaa, prov, edad, sexo, nac, nforma, aoi, factorel
+# Para simplificar, recodificamos la ocupacion a o="ocupado", p="parado" e i="inactivo"
+epa$AOI= factor(epa$AOI)
+epa$ocupacion <- epa$AOI
+lev=levels(epa$AOI)
+
+# Se ha cambiado la codificación de AOI. Ahora los niverles se definen así. 
+# levels(epa$ocupacion) = list(o =  lev[1:2], p = lev[3:4], i = lev[5:7])
+levels(epa$ocupacion) = list(i =  lev[1:3], p = lev[5:6], o = lev[c(4,7)])
+
+# epa$ocupacion[grepl("^Inactivos", epa$ocupacion)] <- "i"
+# epa$ocupacion[grepl("[O-o]cupados", epa$ocupacion)] <- "o"
+# epa$ocupacion[grepl("^Parados", epa$ocupacion)] <- "p"
+
+
+```
+
+### Encuesta de Estructura Salarial
+
+Fuente: Instituto Nacional de Estadística 
+<http://www.ine.es/dyngs/INEbase/es/operacion.htm?c=Estadistica_C&cid=1254736177025&menu=resultados&idp=1254735976596>
+
+Cargamos en R los microdatos 
+
+```{r,cache=TRUE}
+ees= MicroDatosEs::ees2010("~/Formacion informatica/R/Proyectos/Master BD/3 Ciencia de datos con R/Datasets/ine/EES14_WEB")
+ees=as.data.frame(ees)
+```
+
+### Antropométricos
+
+Proporcionados por la revista Journal of Statistics Education, Volume 11, Number 2 (July 2003).
+<http://ww2.amstat.org/publications/jse/v11n2/datasets.heinz.html>
+
+```{r}
+url="http://ww2.amstat.org/publications/jse/datasets/body.dat.txt"
+body <- read.table(url)
+BodyMeasurements <- c("Biacromial_diameter","Biiliac_diameter","Bitrochanteric_diameter","Chest_depth","Chest_diameter","Elbow_diameter","Wrist_diameter","Knee_diameter","Ankle_diameter","Shoulder_girth","Chest_girth","Waist_girth","Navel_girth","Hip_girth","Thigh_girth","Bicep_girth","Forearm_girth","Knee_girth","Calf_max_girth","Ankle_min_girth","Wrist_min_girth","Age","Weight","Height","Gender")    
+names(body) <- BodyMeasurements 
+```
+
+
+# Distribución de  Frecuencias
+
+La forma más sencilla de visualizar y simplificar los datos sin apenas perder la información que contienen es mediante la distribución de frecuencias. Consiste en contar el número de veces que ocurre cada valor en unos datos. Debemos distinguir entre variables categóricas y numéricas. 
+
+
+## Variables categóricas
+
+**Frecuencias absolutas** (conteo) y **frecuencias relativas** (porcentaje de observaciones respecto al total)
+
+```{r}
+# Tabla de frecuencias de la variable aoi (tipo de ocupación) de la EPA
+#absolutas
+table(epa$ocupacion)
+#relativas
+prop.table(table(epa$ocupacion))
+```
+
+Se define la **Moda** como el valor de la variable con mayor frecuencia. En el ejemplo la categoría moda es:  `r names(table(epa$ocupacion))[which.max(table(epa$ocupacion))]`
+
+De forma gráfica mediante ggplot, construimos un gráfico de frecuencias mediante geom_bar()
+
+```{r,fig.height=5}
+ggplot(epa) + geom_bar(aes(ocupacion),fill="grey") 
+```
+ 
+ Los NA que aparecen en la gráfica corresponden a encuestados menores de 16 años. 
+ El comando table no cuenta los NA a no ser que se lo digamos explícitamente
+ 
+ 
+```{r}
+table(epa$ocupacion,useNA='ifany')
+```
+
+
+
+Un tipo especial de variable categórica son aquellas que tienen un orden, por ejemplo los grupos de edad
+
+```{r}
+table(epa$EDAD)
+```
+
+En las representaciones gráficas debemos tener cuidado que las categorías queden ordenadas correctamente
+
+
+```{r,fig.height=5}
+# Hay que convertir la EDAD a factor y reordenar niveles
+epa$EDAD=factor(epa$EDAD)
+epa$EDAD=factor(epa$EDAD,levels=levels(epa$EDAD)[c(2:14,1)])
+ggplot(epa) + geom_bar(aes(EDAD),fill="grey") + 
+  theme(axis.text.x=element_text(angle = 90))
+```
+
+## Variables categóricas múltiples
+
+Podemos estudiar las distribuciones de frecuencias de múltiples variables mediante tablas de contingencia en varias dimensiones
+
+```{r}
+# simplemente pasamos varios argumentos a la función table
+t<- table(epa$ocupacion,epa$SEXO); t
+length(epa$ocupacion)
+length(epa$SEXO)
+```
+
+Las frecuencias marginales, es decir las frecuencias de cada variable considerada de forma individual se obtienen mediante
+
+```{r}
+# Por filas (variable 1)
+margin.table(t,1)
+# Por columnas (variable 2)
+margin.table(t,2)
+```
+
+Para obtener las frecuencias relativas, tanto absolutas como marginales
+
+```{r}
+# Frecuencias relativas
+prop.table(t)
+# Frecuencias relativas marginales por filas
+prop.table(t,1)
+# Frecuencias relativas marginales por columnas
+prop.table(t,2)
+```
+
+Veamos ahora un ejemplo con 3 variables
+
+```{r}
+t<- table(epa$ocupacion,epa$SEXO,epa$NFORMA); 
+t
+```
+
+
+## Gráficos de tablas multidimensionales
+
+Veamos ahora algún ejemplo de representación gráfica de las tablas de frecuencias multidimensionales
+
+```{r}
+t=table(epa$ocupacion,epa$SEXO);
+```
+
+Suelen representarse con diagramas de barras, de diferentes tipos:
+
+- **Barras apiladas** (position="stack): la altura de cada barra principal es proporcional a cada una de las frecuencias de la variable 1. Dentro de cada barra los segmentos de cada color son proporcionales a las frecuencias conjuntas de la variable 1 y 2. 
+
+
+```{r}
+ggplot(epa,aes(SEXO,fill=ocupacion)) + geom_bar(position="stack")
+```
+
+- **Barras apiladas normalizadas** (position="fill"):  puede observarse la distribución de la variable 2 relativa a la variable 1,  pero no se ve la distribución global de la variable 1
+
+```{r}
+ggplot(epa,aes(SEXO,fill=ocupacion)) + geom_bar(position="fill")
+```
+
+- **Barras paralelas** (position="dodge"): la atura de cada barra indica la frecuencia conjunta. Esta es la mejor representación para observar las frecuencias conjuntas, pero es difícil visualizar las marginales.
+
+```{r}
+ggplot(epa,aes(SEXO,fill=ocupacion)) + geom_bar(position="dodge")
+```
+
+
+## Variables numéricas continuas - Histogramas
+
+Para estudiar la distribución de frecuencias en variables continuas dividimos en intervalos y contamos las frecuencias por intervalos.
+La división en intervalos no tiene porqué ser regular, es decir podemos dividir en intervalos de distinta longitud
+La representación gráfica asociada de denomina histograma. 
+En el caso de intervalos no regulares debe representarse la densidad de frecuencia, que se calcula como la frecuencia relativa dividida por la longitud del intervalo
+
+Consideremos una variable x que toma 50 valores.
+
+Sea x= `r round(sample(c(runif(5,0,10),runif(10,10,20),runif(35,20,40)),50,replace=TRUE),1)`  
+
+Para calcular su histograma manualmente deberiamos rellenar la siguiente tabla
+
+
+|Intervalo|Frecuencia absoluta|Frecuencia relativa |Longitud intervalo|Densidad absoluta|Densidad relativa |
+|---------|---------|--------------------|------------------|----------------|--------------------|
+|0-10     |5    | 5/50 = 0.1 |10   |5/10=0.5     |0.1/10=0.01  |
+|10-20    |10   | 10/50 = 0.2|10   |10/10=1      |0.2/10=0.02  |
+| ...     |$n_i$|$f_i=n_i/N$ |$l_i$|$D_i=n_i/l_i$|$d_i=f_i/l_i$|
+|Total    |N=50 |1           |  -   |     -      |      -      |
+
+
+
+Veamos algún ejemplo con datos reales, de cómo calcular y representar un histograma con R
+
+```{r,results='hide',fig.height=3.5}
+h<- hist(body$Height,xlab="Altura (cm)")
+```
+
+La función *hist* calcula más que un gráfico
+
+```{r}
+h
+```
+
+
+## Densidad de frecuencia
+
+En el histograma se puede mostrar la densidad de frecuencia en lugar de la frecuencia absoluta. 
+La densidad de frecuencia en un histograma se define como la frecuencia relativa dividida por la longitud del intervalo.  
+
+```{r,results='hide',fig.height=4}
+h <- hist(body$Height,probability = TRUE, xlab="Altura (cm)")
+```
+
+Si los intervalos no son regulares, hist mostrará por defecto la densidad de frecuencia.  
+
+```{r,results='hide',fig.height=4}
+h <- hist(body$Height,breaks=c(145,160,165,170,175,180,185,200), xlab="Altura (cm)")
+```
+
+
+### Ajuste de densidad
+
+Los histogramas a veces son ruidosos y su forma depende de la elección de los intervalos.
+Muchas veces útil hacer un ajuste suave de la densidad de la distribución de una variable. En R lo hacemos con la función *density*.
+
+```{r,results='hide',fig.height=4}
+h <- hist(epa$DCOM,probability = TRUE, xlab="Meses en la empresa")
+d <- density(epa$DCOM,na.rm = TRUE)
+lines(d,col="red")
+```
+
+Realiza el ajuste mediante el método de estimación de densidad Kernel
+Consiste en un ajuste de la función de densidad mediante la superposición de unas funciones de un tipo dado (suelen ser gaussianas, rectangulares, cosenos, etc.), que se denominan *funciones kernel*. 
+
+$$\hat{f}(x)=\frac{1}{n\,b_w} \sum_{j=1}^{m} K\left(\frac{x-x_{j}}{b_w} \right) $$
+
+donde el parámetro $b_w$ se denomina ancho de banda y representa la suavidad del ajuste. Muchas veces es necesario elegir el parámetro `bw` manualmente
+
+
+![Estimación de densidad por funciones kernel](img/histogram_and_KDE.png)
+
+
+En nuestro caso de ejemplo, veamos los ajustes de densidad obtenidos usando diferentes anchos de banda
+
+```{r,results='hide',fig.height=5}
+h <- hist(body$Height,probability = TRUE, xlab="Altura")
+d1 <- density(body$Height,bw= 2.5,na.rm = TRUE)
+d2 <- density(body$Height,bw= 5,na.rm = TRUE)
+lines(d1,col="red")
+lines(d2,col="blue")
+```
+
+Pueden realizarse los mismos gráficos usando ggplot
+
+```{r, message=FALSE, warning=FALSE}
+ggplot(body,aes(x=Height)) + 
+  geom_histogram(aes(y=..density..),binwidth=5) + 
+  geom_density(color="red",bw=2.5) +
+  geom_density(color="blue",bw=5)
+```
+
+
+## Distribución Acumulada
+
+Cuando trabajamos con variables cuantitativas y con cualitativas ordinales es interesante conocer las distribuciones de frecuencias acumuladas.
+
+La distribución de frecuencias acumulada, tiene sentido para variables numéricas y para categóricas ordenadas.
+Cuenta el número de eventos con valor igual o menor que cada posible valor de la variable. 
+
+En R, la función `ecdf` calcula una función de distribución acumulada.
+
+```{r,fig.height=4.8}
+x=body$Height
+fac=ecdf(x)
+# ojo, ecdf devuelve una función
+plot(fac, verticals = TRUE, do.points = FALSE)
+```
+
+# Medidas numéricas
+
+Aunque la distribución de frecuencias nos da mucha información sobre nuestros datos, es deseable poder caracterizar los aspectos principales de una distribución de frecuencias mediante unas medidas numéricas que nos permitan resumir las características principales.
+
+De esta manera podemos comparar diferentes conjuntos de datos o distribuciones mediante el análisis de las medidas numéricas adecuadas. Podemos distinguir diferentes tipos de medidas: 
+
+- Centralidad
+- Posición
+- Dispersión
+- Forma
+- Concentración
+
+que nos serán necesarias en función del fenómeno que queremos analizar. 
+
+Existen una serie de preguntas genéricas que nos debemos hacer para toda medida de síntesis
+
+- ¿Intervienen todos los datos?
+- ¿Con qué tipo de datos se puede calcular?
+- ¿Es única?
+- ¿Es robusta?
+- ¿Qué representatividad tiene?
+- ¿Cómo se interpreta?
+- ¿Cómo se comporta al transformar los datos originales?
+
+
+# Medidas de centralidad/posición
+
+Son las medidas que buscan situar dónde se encuentra situada la distribución de frecuencias, bien sean sus valores más representativos o centrales, bien sean sus zonas intermedias o sus extremas.
+
+## Media
+
+Dado un conjunto de datos $\{x_1,x_2, ..., x_n\}$, la media se define como
+
+$$ \bar{x}=\frac{1}{n} \sum_{i=1}^{n} x_i $$
+
+El mayor problema de la media es que es una medida muy sensible a "outliers" o valores anómalos. Eso quiere decir que la media no es una medida robusta.
+
+Por ejemplo si miramos los salarios de la Encuesta de Estructura Salarial
+
+```{r}
+mean(ees$SALBRUTO)
+summary(ees$SALBRUTO)
+```
+
+Se observa que el valor máximo es muy superior a la media. Si tomamos una muestra que contiene el máximo o no, obtenemos valores muy distintos para la media muestral. 
+
+```{r,fig.height=5,echo=FALSE}
+set.seed(1)
+# Tomo una muestra que contiene al máximo salario
+salarios = c(sample(ees$SALBRUTO,100),max(ees$SALBRUTO,100))
+hist(salarios, xlim=c(0,1e5), breaks = c(seq(0,1e5,5000),max(salarios)),main="Medias muestra de tamaño 100 ")
+lines(density(salarios,bw=5e3),col="grey")
+# Media sin contar el máximo salario
+mt=mean(salarios[salarios<max(salarios)])
+# Media contando todos los puntos
+m=mean(salarios)
+abline(v=mean(salarios),col="red",lwd=2)
+abline(v=mean(salarios[salarios<max(salarios)]),col="blue",lwd=2)
+text(1e4,2e-5,paste("Trimmed Mean=",round(mt,1)),col="blue",cex=0.8)
+text(3.8e4,3e-5,paste("Mean=",round(m,1)), col="red", cex=1)
+```
+
+## Otros tipos de media
+
+- **Media Truncada (trimmed mean)**: Eliminamos una fracción $\alpha$ por arriba y abajo de los datos ordenados. Esto la hace poco sensible a los valores anómalos.
+
+```{r}
+mean(salarios,trim = 0.01)
+mean(salarios,trim = 0.1)
+```
+
+
+- **Media Ponderada**: Los distintos elementos tienen distinta importancia
+
+$$ \bar{x}=\frac{\sum_{i=1}^{n} w_i \, x_i}{\sum_{i=1}^{n} w_i}$$
+
+```{r}
+# La variable FACTOTAL se denomina factor de elevación y se usa para corregir los errores de muestreo de la encuesta
+weighted.mean(ees$SALBRUTO,ees$FACTOTAL)
+```
+
+
+- **Geométrica**: Relevante cuando el conjunto de números es interpretable por su producto. 
+Por ejemplo tasas de crecimiento ($x_{i+1} = t_1 t_2 ... t_n x_{0}$)
+$$ \bar{t}=\left(\prod_{i=1}^{n} t_i \right)^{\frac{1}{n}}$$
+
+
+## Mediana
+
+La mediana de una serie de datos $\{x_1,x_2,...,x_n\}$ es el valor tal que la mitad de las x's son mayores que él y la otra mitad son menores
+
+- Si n es impar, entonces la mediana  es el valor central $x_{(n+1)/2}$ de la serie ordenada.
+- Si n es par, la mediana es el promedio de los dos valores centrales
+
+La mediana es muy poco sensible los valores anómalos, en este sentido es una medida robusta. Para comparar variables que contienen muchos valores anómalos, la mediana es más útil que la media.
+
+En R se calcula mediante la función *median*
+
+```{r}
+x=rnorm(100)
+# Mediana según definición
+x=sort(x)
+mean(x[50:51])
+# Usando la función apropiada de R
+median(x)
+```
+
+## Cuantiles
+
+- El cuantil p, que denotamos $q_p$, de una variable, es el valor tal que una fracción p  
+de observaciones se encuentran por debajo  y la fracción  (1 − p) se
+encuentran por encima de este valor.
+
+- Los percentiles, $p_k$ se definen de forma equivalente expresados en porcentaje en lugar de fracciones
+
+- Los cuartiles $Q_1$, $Q_2$ y $Q_3$ corresponden a los cuantiles 0.25, 0.5 y 0.75 
+
+
+Veamos gráficamente para una distribución de frecuencias dada, la relación de  los cuartiles con las áreas encerradas por la densidad de frecuencia.
+
+```{r,echo=FALSE}
+f=7
+e=1
+x=seq(0,1.5,0.01)
+y=dweibull(x,shape=f,scale=e)
+
+plot(x,y,type="l",xlim=c(0.4,1.4),ylim=c(0,3),ylab="p(x)")
+q=qweibull(c(0.25,0.5,0.75,0.99999),shape=f,scale=e)
+
+x=seq(0,q[1],0.001)
+y=dweibull(x,shape=f,scale=e)
+polygon(c(0,x,q[1]),c(0,y,0),col="skyblue")
+text(q[1],2.75,"Q1",col=1,cex=0.8)
+text(0.875*q[1],0.5,"25%",cex=0.8)
+
+x=seq(q[1],q[2],0.001)
+y=dweibull(x,shape=f,scale=e)
+polygon(c(q[1],x,q[2]),c(0,y,0),col="green")
+text(q[2], 2.75, "Q2",col=1,cex=0.8)
+text((q[1]+q[2])/2, 0.5, "25%", cex=0.8)
+
+x=seq(q[2],q[3],0.001)
+y=dweibull(x,shape=f,scale=e)
+polygon(c(q[2],x,q[3]),c(0,y,0),col="yellow")
+text(q[3], 2.75, "Q3",col=1,cex=0.8)
+text((q[2]+q[3])/2, 0.5, "25%", cex=0.8)
+
+x=seq(q[3],q[4],0.001)
+y=dweibull(x,shape=f,scale=e)
+polygon(c(q[3],x,q[4]),c(0,y,0),col="orange")
+text((q[3]+q[4])/2, 0.5, "25%", cex=0.8)
+
+boxplot(rweibull(10000,shape=f,scale=e),horizontal=TRUE,alpha=0.3,add=TRUE,cex=0.5)
+
+```
+
+Para calcular cuantiles en R lo hacemos mediante la función `quantile`
+
+```{r}
+x=ees$SALBRUTO
+quantile(x,probs = 0.6)
+# Si no especificamos probs, por defecto muestra el 0,0.25,0.5,0.75 y 1
+quantile(x)
+# Podemos especificar un conjunto de probs mediante seq
+# Calculo los cuantiles 0,0.1,0.2, ..., 0.9,1
+quantile(x,probs=seq(0,1,.1))
+```
+
+
+Los cuantiles son en realidad los inversos de la distribución acumulada de frecuencias
+
+
+```{r,cache=FALSE,fig.height=4.5}
+x=ees$SALBRUTO
+plot(ecdf(x),xlim=c(0,1e5))
+abline(v=quantile(x,seq(0,1,.25)),lty=2,lwd=0.5,col=2)
+abline(h=seq(0,1,.25),lty=2,lwd=0.5,col=2)
+```
+
+
+
+### Boxplots
+
+A partir de los cuantiles se elaboran los boxplots o diagramas de caja, que son muy útiles para comparar las distribuciones de datos pertenecientes a distintas muestras o categorías. Se trata de representar la distribución de datos mediante una caja y unos segmentos, cuyos límites se corresponden con medidas de posición tal y como se muestra en la siguiente figura.
+
+![Significado de un boxplot](img/Boxplot.png)
+
+Veamos un  ejemplo con los datos de la encuesta de estructura salarial, donde  mostramos los salarios de los encuestados divididos según su nivel de estudios.   
+
+```{r,fig.height=5}
+# Reordenamos los niveles por orden creciente de salario mediante reorder(ESTU,SALBRUTO) 
+ggplot(ees) + geom_boxplot(aes(reorder(ESTU,SALBRUTO),SALBRUTO)) + theme(axis.text.x = element_text(angle=30)) +
+  coord_cartesian(ylim=c(0,1e5)) + xlab("")
+```
+
+Podemos hacer el mismo gráfico  distinguiendo además  por sexo y tipo de jornada, gracias al coloreado y los facets
+
+```{r,fig.height=4}
+ggplot(ees) +  
+geom_boxplot(aes(reorder(ESTU,SALBRUTO),SALBRUTO,fill=SEXO)) + facet_wrap(~TIPOJOR) + 
+  theme(axis.text.x = element_text(size=6,angle=30)) + xlab("") +
+  coord_cartesian(ylim=c(0,1e5))
+```
+
+Podemos realizar también un boxplot a medida, es decir donde los límites de las cajas y de los segmentos signifiquen cosas distintas a lo habitual. 
+Por ejemplo hagamos un boxplot con cuantiles 0.05, 0.25, 0.5, 0.75 y 0.95. Además pintamos las medias mediante puntos.
+Con el paquete ggplot es posible, haciendo stat="identity" dentro de geom_boxplot y especificando manualmente los límites de cajas y segmentos: ymin, lower, middle e ymax.
+
+
+```{r}
+# En primer lugar escribimos una función que me calcula las métricas
+seven_nums <-  function(x,p=c(0,0.05,0.25,0.5,0.75,0.95,1)){
+  q=quantile(x,p,na.rm=TRUE)
+  res =data.frame(num=length(x),m=mean(x,na.rm=TRUE),sd=sd(x,na.rm=TRUE),t(q))
+  names(res)[-(1:3)] =paste0("q",round(p*100))
+  res
+}
+tmp <- ees %>% group_by(ESTU,SEXO,TIPOJOR) %>% do({
+  seven_nums(.$SALBRUTO)
+})
+
+ggplot(tmp) +  
+geom_boxplot(aes(x=reorder(ESTU,m),ymin=q5,lower=q25,middle=q50,
+                 upper=q75,ymax=q95,fill=SEXO),alpha=0.3,stat="identity") +
+  geom_point(aes(reorder(ESTU,m),m,color=SEXO), position=position_dodge(width=.9)) + 
+  facet_wrap(~ TIPOJOR) + 
+  theme(axis.text.x = element_text(size=6,angle=30))
+```
+
+## Stripchart
+
+Cuando tenemos pocos datos, a veces es más útil el stripchart que muestra la distribución de todos los puntos
+
+```{r,echo= FALSE}
+opar <- par(mfrow=c(2,2),mex=0.8,mar=c(3,3,2,1)+.1)
+colors=rep(c("red","blue","green"),nrow(iris))
+stripchart(iris$Sepal.Length~iris$Species,col=colors)
+stripchart(iris$Sepal.Length~iris$Species,method="stack",col=colors)
+stripchart(iris$Sepal.Length~iris$Species,method="jitter",col=colors)
+stripchart(iris$Sepal.Length~iris$Species,method="jitter",jitter=.03,col=colors)
+par(opar)
+```
+
+
+# Medidas de dispersión
+
+Es importante completar la información proporcionada por las medidas de posición con medidas de dispersión que midan el grado de variabilidad de las variables.
+
+## Varianza / Desviación típica
+
+La medida de dispersión más habitual es la varianza. Debemos de distinguir entre 
+
+**Varianza poblacional**
+$$ \sigma^2 = \frac{1}{n}\sum_{}^{}\left( x_i - \mu \right)^2$$
+
+**Varianza muestral**
+$$ s^2 = \frac{1}{n-1}\sum_{}^{}\left( x_i - \bar{x} \right)^2$$
+
+dependiendo de si se aplica a una población con la media conocida o a una muestra de la que conocemos una estimación de la media poblacional, que es la media muestral. 
+
+En las fórmulas $\bar{x}$ es la media de la muestra y $\mu$ la media de la población.
+
+La  **Desviación típica ** es simplemente la raíz cuadrada de la varianza, y tiene las mismas unidades que los datos.
+
+$\sigma=\sqrt{\sigma^2}$
+
+La varianza, al igual que la media, está muy influenciada por los valores anómalos.
+
+
+**Autotexto:**
+**¿Por qué n-1 ?**
+
+Una pregunta muy habitual es porque en la varianza muestral dividimos por n-1 y no por n. Respondamos de un modo práctico, a partir de los resultados de una simulación. Este es un enfoque que vamos a utilizar habitualmente a lo largo del curso. No vamos a hacer demostraciones matemáticas complicadas, pero vamos a hacer comprobaciones mediante experimentos con R. Este enfoque se denomina por muchos autores "Estadística Moderna". 
+
+Genero 10000 muestras de una población normal con media 0 y $\sigma=1$
+
+Calculo $\sum_{i}\left( x_i - \bar{x} \right)^2$ 
+
+```{r}
+varn <- function(x){sum((x-mean(x))^2)}
+res=NULL
+# Genero 10000 muestras de tamaño 10 y calculo la suma de cuadrados
+n=10
+s<- replicate(10000,varn(rnorm(n)))
+mean(s)
+# Para una muestra de tamaño 100
+n=100
+s<- replicate(10000,varn(rnorm(n)))
+mean(s)
+
+```
+
+Se observa que el valor medio de $\sum_{i}\left( x_i - \bar{x} \right)^2$ es aproximadamente 9 o 99, en lugar de 10 o 100. Por eso en la definición de la varianza muestral se divide por n-1
+
+La diferencia radica en que en el caso de la población la media real es conocida y para la muestra tenemos una estimación de esta calculada a partir de los datos. 
+
+**Fin autotexto**
+
+
+## Coeficiente de variación
+
+Se define como
+
+$$ CV = \frac{\sigma}{|\bar{x}|} $$
+
+
+Simplemente escala la desviación típica a la magnitud de $\bar{x}$. Es útil para comparar la dispersión en variables con diferentes órdenes de magnitud, por ejemplo porque han sido expresadas en unidades distintas.
+
+## Intervalo intercuartílico 
+
+$$
+IQR = Q_3 -Q_1 = q_{0.75} - q_{0.25} = P_{75} - P_{25}
+$$
+
+Es una medida robusta, a la que afectan poco los valores anómalos.
+
+En él se basa el criterio de detección de valores anómalos que usan los boxplots: $x_i$ es anómalamente grande si $x_i \ge q_{0.75} + 1.5 IQR$ y anómalamente pequeño si  $x_i \le q_{0.25} - 1.5 IQR$. Este criterio se basa en las propiedades de la distribución normal y según él si los valores están normalmente distribuidos solo el 0.70 % serían clasificados como anómalos y se usa el IQR para que los propios valores anómalos no influyan en la medida de la dispersión. 
+
+![IQR y valores anómalos](img//criterio_outliers.png)
+
+# Medidas de Forma
+
+Las medidas de posición y dispersión son las más habituales a la hora de sintetizar la información contenida en unos datos. Sin embargo en algunas ocasiones es conveniente obtener más información sobre la forma de las distribuciones. 
+
+## Asimetría (skewness)
+
+Las distribuciones de frecuencia pueden clasificarse según su simetría de la siguiente manera: 
+
+![Tipos de simetría/asimetría en las distribuciones de frecuencia](img/asimetria.png)
+
+
+El *skewness* o coeficiente de asimetría es un indicador numérico que clasifica la simetría de una distribución de frecuencias según su valor.
+
+$$Sk = \frac{1}{n} \sum_{i=1}^{n} \left(\frac{ x_i - \mu}{\sigma} \right)^3 $$
+
+- Si Sk<0 --> Asimétrica a izquierda
+- Si Sk=0 --> Simétrica
+- Si Sk>0 --> Asimétrica a derecha
+
+En R podemos calcularlo usando la función `skewness` contenida en el paquete e1071.
+
+En el ejemplo siguiente, generamos 3 distribuciones de números aleatorios con diferentes propiedades de simetría y calculamos su skewness. 
+
+La distribución de Weibull depende de dos parámetros: forma(shape) y escala(scale) y en función de sus valores genera números distribuidos con diferentes propiedades de simetría. En cambio la distribución normal genera números simétricamente distribuidos.
+
+
+```{r,fig.height=3.5,message=FALSE}
+library(e1071)
+df=rbind(data.frame(asim="right",x=rweibull(1000,shape = 1.3,scale= 1)),
+          data.frame(asim="left",x=rweibull(1000,shape = 7,scale=3)-2),
+            data.frame(asim="norm",x=rnorm(10000,mean=1,sd=1)))
+skew= df %>% group_by(asim) %>% summarise(sk=skewness(x))  
+ggplot(df) + geom_density(aes(x,color=asim)) + 
+  geom_text(aes(1.2*(as.numeric(asim)-1.5),c(0.5,1,0.4),label=paste0("Sk=",round(sk,2)), color=asim),data=skew) +
+  scale_color_hue(guide=FALSE)
+```
+
+## Curtosis
+
+Mide si una distribución es más "picuda" que una normal o más plana
+
+$$ K = \frac{1}{n} \sum_{i=1}^{n} \left(\frac{ x_i - \mu}{\sigma} \right)^4 -3$$
+
+- Si K>0 --> Leptocúrtica (más apuntada)
+- Si K=0 --> Mesocúrtica
+- Si K<0 --> Platicúrtica (más plana)
+
+En realidad los valores que más afectan a la curtosis son los valores extremos (las colas de la distribución) :
+
+- Platicúrtica(K<0)--> colas pequeñas
+- Leptocúrtica (K>0) --> colas largas
+- Una curtosis grande indica la presencia de valores anómalos, respecto a una distribución normal
+
+En R calculamos la curtosis mediante la función `kurtosis` del paquete e1071.
+
+```{r}
+# Uniforme  - platicúrtica
+# Es intervalo ha elegido para que tenga varianza unidad 
+xu=runif(100000,min = -1.73,max = 1.73)
+kurtosis(xu)
+# t-student - leptocúrtica  
+xt=rt(100000,df=4)
+# Escalo para que tenga varianza unidad
+xt=xt/sd(xt)
+kurtosis(xt)
+
+```
+
+Gráficamente
+
+```{r, message=FALSE, warning=FALSE}
+df=rbind(data.frame(K="t-student - lepto",x=xt),
+          data.frame(K="Uniforme - plati",x=xu),
+            data.frame(K="Normal",x=rnorm(100000,mean=0,sd=1)))
+ggplot(df) + geom_density(aes(x,color=K)) + xlim(-5,5)
+```
+
+
+Un truco mnemotécnico nos lo da la siguiente imagen, creada originalmente por el estadístico William Gosset, más conocido por su seudónimo Student, descubridor de la distribución t de Student.
+
+![kurtosis](img//kurtosis.gif)
+
+
+
+# Medidas de concentración
+
+## Curva de Lorentz e Índice de Gini
+
+Se pretende medir la distribución entre sus componentes de una determinada variable: por ejemplo riqueza entre personas
+
+![Curva de Lorent e índice de Gini](img//Gini_coefficient.png)
+
+Veamos cómo se calcula  la curva de Lorentz por ejemplo para la distribución de salarios de la encuesta de estructura salarial:
+
+- Se ordena en sentido creciente el vector de salarios de las personas encuestadas. Y se calcula la suma acumulada de salarios. 
+
+- Se muestra en el eje x, la proporción de personas y en el eje y la proporción de salario acumulado.
+
+-  Si la curva de Lorentz pasa por ejemplo por el punto (0.5,0.3) quiere decir que el 50% de las personas más pobres poseen un 30% de la riqueza total.
+
+
+El **índice de Gini** mide cuanto se aleja la distribución de salarios de la equipartición (recta y=x). Representa el área de la zona sombreada de la figura
+
+```{r,cache==TRUE, fig.height = 3.7 }
+x=ees$SALBRUTO
+n=length(x)
+x=sort(x)
+cumx=cumsum(x)
+plot((1:n)/n,cumx/cumx[n],type="l",xlab="Prop personas",ylab="Prop salario acumulado")
+polygon(c(0,(1:n)/n,0),c(0,cumx/cumx[n],0),col="yellow")
+abline(0,1)
+```
+
+En R, podemos calcular el índice de Gini y la curva de Lorentz mediante le paquete `ineq`.
+
+```{r,include=FALSE}
+if(!require('ineq'))
+  install.packages('ineq')
+```
+
+```{r,fig.height=3.7}
+library('ineq')
+# Indice de GIni
+Gini(ees$SALBRUTO)
+# Curva de Lorentz
+plot(Lc(ees$SALBRUTO))
+```
+
+Podemos hacernos más preguntas sobre la desigualdad en los salarios. Respondamos a algunas.
+
+¿Están más repartidos los salarios en hombres o mujeres?
+
+```{r}
+ees %>% group_by(SEXO) %>% summarise(gini=Gini(SALBRUTO))
+```
+
+¿Y en grupos por estudios terminados?
+
+```{r}
+ees %>% group_by(ESTU) %>% summarise(gini=Gini(SALBRUTO))
+```
+
+
+# Dos o más variables numéricas
+
+
+## Covarianza
+
+Para detectar relaciones entre dos variables continuas, las medidas más básicas son la covarianza y la correlación lineal. 
+
+**Covarianza:**
+
+$$
+Cov(x,y) = \frac{1}{n-1} \sum_{i=1}^{n} \left( x_i - \bar{x} \right)  
+  \left( y_i - \bar{y} \right)
+$$
+
+
+Mide cuanto se espera que una variable cambie cuando cambia la otra, suponiendo que ambas están relacionadas linealmente. 
+Si dos variables son independientes su covarianza es 0.  
+
+La tabla siguiente nos indica el signo de las contribuciones de cada observación a la covarianza
+
+
+| Contribución cov| $y<\bar{y}$| $y>\bar{y}$|
+|-----------------|----------|----------|
+|$x<\bar{x}$      |+         |-         |
+|$x>\bar{x}$      |-         |+         |
+
+
+En el gráfico a continuación, se muestran los puntos (x,y) de dos casos. El de la izquierda con covarianza positiva y de la derecha con covarianza negativa. Los puntos están coloreados en azul cuando hacen una contribución positiva a la covarianza y en rojo cuando su contribución es negativa. Se observa la diferente proporción de puntos rojos y azules en cada uno de los casos.
+
+```{r,echo=FALSE,fig.width=10}
+x=rnorm(100)
+y=1+2*x+2*rnorm(100)
+mx=mean(x)
+my=mean(y)
+df=data.frame(x,y)
+df=df %>% mutate(difmx=x-mx,difmy=y-my,cov=factor(sign(difmx*difmy)))
+y=1-2*x + 2*rnorm(100)
+df1=data.frame(x,y)
+df1=df1 %>% mutate(difmx=x-mx,difmy=y-my,cov=factor(sign(difmx*difmy)))
+df=rbind(cbind(corr="positiva",df),cbind(corr="negativa",df1))
+
+ggplot(df) + geom_point(aes(x,y,color=cov)) + geom_hline(aes(yintercept = my),color="grey60",lty=2) + geom_vline(aes(xintercept = mx),lty=2,color="grey60") + 
+  facet_wrap(~corr) + xlab("") + ylab("")
+
+
+```
+
+## Correlación
+
+Para tener una medida de relación que no dependa de la escala de cada
+variable, usamos la correlación lineal.
+
+Se define a la **correlación lineal** o coeficiente de correlación de Pearson 
+como:
+
+$$ r(x,y) = \frac{Cov(x,y)}{\sigma_x \sigma_y}$$
+
+La correlación lineal varía entre -1 y 1
+
+- Si r=1 si x e y están perfectamente correlacionadas de forma positiva
+- Si r=1 si x e y están perfectamente correlacionadas de forma negativa
+- Si r=0 son independientes linealmente. Esto no quiere decir que no pueda existir una relación no lineal entre las variables
+
+Para calcular la covarianza y correlación en R se usan las funciones `cov` y `cor`
+
+```{r}
+x=rnorm(100,sd=4); y=2*x + rnorm(100)
+cov(x,y)
+cor(x,y)
+```
+
+Sin embargo la covarianza y la correlación nula no son una condición suficiente para la independencia de dos variables.
+Es posible que dos variables estén relacionadas de forma no monótona y en ese caso la correlación lineal podría ser nula.
+Veamos un  ejemplo de dos variables  x e y que están relacionadas por una relación cuadrática y la correlación lineal es aproximadamente 0.
+
+```{r,fig.height=3.5,fig.width=4}
+set.seed(2)
+x=rnorm(200); 
+#
+y=x^2 + rnorm(200)
+cor(x,y)
+```
+
+
+```{r}
+plot(x,y,cex=0.7)
+```
+
+## Matrices de correlación
+
+Cuando tenemos más de dos variables, entre las cuales quiero calcular la correlación, podemos hablar de la matriz de covarianza o la matriz de correlación. 
+
+En R, se puede pasar como argumento de `cov` o `cor` una matriz o un data frame numérico. 
+En ese caso devuelve una matriz con las covarianzas o correlaciones lineales de las diferentes combinaciones de columnas.
+
+$$C_{i,j} = cov(x_i,x_j)$$
+
+```{r,echo=TRUE}
+tmp <- body %>%  dplyr::select(Age,Gender,Weight, Height, Chest_diameter,Chest_depth,	                            Bitrochanteric_diameter,Wrist_min_girth, Ankle_min_girth)
+tmp$Gender=factor(tmp$Gender)
+levels(tmp$Gender)=c("W","M")
+```
+
+```{r}
+cor(tmp[c(1,3,4,5)])
+```
+
+## Gráficos de correlación 
+
+### Gráficos de dispersión 
+
+Con múltiples variables podemos hacer una matriz de gráficos de dispersión
+
+```{r,cache=TRUE,message=FALSE,warning=FALSE,fig.height=5.5}
+pairs(tmp,col=as.numeric(tmp$Gender),cex=0.5,alpha=0.3)
+```
+
+Con `ggplot`, se hace mediante la función `ggpairs` del paquete `GGally`. Muestra los gráficos de dispersión de las diferentes combinaciones de variables en el triángulo inferior, mientras que utiliza la diagonal para mostrar las distribuciones univariantes y el triángulo superior para mostrar los valores numéricos del coeficiente de correlación. 
+
+```{r,cache=TRUE,message=FALSE,warning=FALSE,fig.height=5.5}
+library(GGally)
+GGally::ggpairs(tmp, columns=c(1,3:6))
+
+```
+
+
+Si se elige una variable para agrupar y colorear, calcula también las correlaciones por grupos.
+
+```{r,cache=TRUE,message=FALSE,warning=FALSE,fig.height=5.5}
+
+
+```
+
+
+# ¿Qué has aprendido?
+
+En esta unidad has aprendido a exprimir la información que está contenida en un conjunto de datos. 
+
+En concreto, has aprendido a:
+
+- Calcular, representar y comparar distribuciones de frecuencias
+- Sintetizar los datos mediante medidas de:
+    - posición
+    - dispersión 
+    - forma
+    - desigualdad
+- Detectar correlaciones entre variables
+
+
+de forma tanto numérica como gráfica. 
+
+Ahora ya dispones de todo el conocimiento para realizar el análisis exploratorio de datos, que es un elemento fundamental de la ciencia de datos, ya que es a través del cual serás capaz de hacerte las preguntas adecuadas que posteriormente responderás usando las técnicas de inferencia y modelización que vas a aprender en las siguientes unidades. 
+
+Para terminar, vuelve a las preguntas del inicio de la unidad y verás como eres capaz de dar una respuesta para todas ellas.
+
+# Autoevaluación
+
+1. La variable ESTU de la encuesta de estructura salarial, que representa el nivel de estudios de los encuestados es
+
+    a. Una variable cuantitativa continua
+    b. Una variable cuantitativa discreta
+    c. Una variable cualitativa ordinal
+    d. Ninguna de las respuestas anteriores
+
+2. La variable TIPOCON de la encuesta de estructura salarial representa el tipo de contrato. ¿Cuál es la categoría más frecuente?
+    
+    a. Duración indefinida
+    b. Duración determinada
+    c. Obra y servicios
+    d. Indeterminada
+
+3. Que comando de R has utilizado para responder a la pregunta anterior
+    
+    a. hist
+    b. density
+    c. table
+    d. mean
+
+4. La media es una medida
+
+    a. Sensible a los valores anómalos
+    b. Robusta frente a los valores anómalos
+    c. Insensible a los valores anómalos
+    d. Mal definida, si la variable puede tomar el valor 0. 
+
+5. Di cuál de las siguientes relaciones se representaría mejor con un boxplot
+
+    a. La altura de un conjunto de personas en función del peso 
+    b. La evolución temporal de la cotización de un valor en la bolsa
+    c. La proporción de personas según el grupo de edad al que pertenecen
+    d. La distribución de alturas de un conjunto de personas en función del sexo
+    
+6. Si el cuantil 0.3 una cierta variable es 5, ¿qué podemos decir del cuantil 0.2 de esa misma variable?
+
+    a. Es menor que 5
+    b. Es menor o igual que 5
+    c. Es mayor que 5
+    d. Es mayor o igual que 5
+
+7. El rango intercuartílico es una medida de:
+
+    a. Forma
+    b. Centralidad
+    c. Desigualdad
+    d. Dispersión
+
+8. Si una distribución tiene skewness menor de 0
+
+    a. Es simétrica
+    b. Es asimétrica a izquierdas
+    c. Es asimétrica a derechas
+    d. No se como es su simetría
+
+9. Si dos variables son independientes
+
+    a. Su covarianza es 0
+    b. Su coeficiente de correlación es 0
+    c. Su coeficiente de correlación es menor de 1
+    d. Todas las respuestas anteriores son ciertas
+
+10. Si la correlación lineal entre dos variables x,y es 1
+
+    a. y= a + bx con b>0 
+    b. y= a + bx con b=0
+    c. y= a + bx con b<0
+    d. y= a + bx con a>0
+
+
+# Solucionario
+
+1-c;2-a;3-c;4-a;5-d;6-b;7-d;8-b;9-d;10-a
+
+
+# Bibliografía 
+
+- Introduction to Probability and Statistics Using R, G. Jay Kerns.
+- R for Data Science, Garrett Grolemund, Hadley Wickham <http://r4ds.had.co.nz/>
+- Probabilidad y estadística para ingeniería y ciencias / Jay L. Devore
+
+
