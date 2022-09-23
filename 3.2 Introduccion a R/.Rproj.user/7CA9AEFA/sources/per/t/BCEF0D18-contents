@@ -1,0 +1,2910 @@
+---
+title: 'Introducción a R'
+author: 'MasterD'
+output:
+  html_document:
+    highlight: tango
+    theme: united
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: no
+  pdf_document:
+    toc: yes
+  revealjs::revealjs_presentation:
+    center: yes
+    css: style.css
+    highlight: pygments
+    theme: sky
+  word_document:
+    reference_docx: www/plantillaMasterD_basica5.docx
+    toc: yes
+---
+
+```{r setup, include=FALSE,message=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(width=100)
+library(knitr)
+
+colFmt = function(x,color){
+  outputFormat = opts_knit$get("rmarkdown.pandoc.to")
+  if(outputFormat == 'latex')
+    paste("\\textcolor{",color,"}{",x,"}",sep="")
+  else if(outputFormat == 'html')
+    paste("<font color='",color,"'>",x,"</font>",sep="")
+  else if(outputFormat == 'docx')
+    paste("<font color='",color,"'>",x,"</font>",sep="")
+  else
+    x
+}
+```
+
+# Tu reto en esta unidad
+
+Seguramente habrás trabajado alguna vez con datos y habrás realizado algunas manipulaciones con ellos y calculado algunas estadísticas.  Es posible que para ello hayas utilizado para ello una hoja de cálculo o algún paquete estadístico basado en menús y cuadros de dialogo, pero ¿serías capaz ahora mismo de hacer tus propios programas y empezar a transformar los datos, de forma eficiente, en conocimiento?
+
+En esta unidad vamos a aprender a utilizar R, que no es solo un software estadístico sino un lenguaje de programación, que permite realizar análisis mucho más potentes y reproducibles. R es junto con Python, que introduciremos más adelante en este curso, el lenguaje preferido por los estadísticos y científicos de datos. La curva de aprendizaje de un lenguaje de este tipo puede ser dura, pero una vez superada merece la pena.
+
+# Introducción
+
+El objetivo de esta unidad es aprender el funcionamiento básico del lenguaje R. El enfoque principal del curso es aprender los conceptos a partir de ejemplos por lo que es necesario ir ejecutando simultáneamente el código que te proponemos en una sesión de R conforme lees este manual.
+
+Para ello puedes ir copiando y pegando el código del manual a la consola de R, pero te recomendamos que lo hagas de otra manera.
+
+En campus encontrarás unos ficheros con la extensión .Rmd asociados a cada capítulo. Abriendo estos ficheros desde Rstudio podrás identificar los bloques de código como los que ves en la imagen e ir ejecutando paso a paso todos los comandos. 
+
+![](img/ejemplo_chunk.png)
+
+**Autotexto**
+Esta estrategia la vamos a utilizar a lo largo de todo el curso, así que te animamos a que no solo vayas ejecutando los comandos paso a paso sino a que además experimentes por ti mismo  a partir de los ejemplos propuestos. 
+En campus pondremos a disposición algunos vídeos en los que mostraremos como sacar el mayor partido a esta metodología de aprendizaje. 
+**Fin Autotexto**
+
+## Descarga e instalación de R
+
+Lo primero que necesitamos es descargar e instalar R. R es software libre y su descarga es gratuita.
+Libre no quiere decir siempre gratuito, aunque R también lo es, significa que podemos acceder al código escrito por otros usuarios y modificarlo libremente.
+
+A continuación os indicamos unas breves instrucciones de descarga e instalación en el sistema operativo Windows.
+
+**Autotexto**
+Para ver paso a paso el proceso de instalación de R hay un vídeo disponible en campus
+**Fin Autotexto**
+
+R también está disponible en otros sistemas operativos como Mac OS  y Linux.
+
+
+### Descargar R
+
+- Ir al sitio web principal de R <http://www.r-project.org>
+- Click en  el botón CRAN, en la parte izquierda 
+- Seleccionar un  mirror cercano en el menú que aparece
+    - Desde  España <https://ftp.cixug.es/CRAN/> funciona bien 
+- Selecciona tu plataforma (Linux, MacOS X, Windows)
+    - Click en base y os direccionará a la página de descarga de la última versión de R.
+
+### Instalar R
+
+- Ejecutar el fichero descargado y seguir las instrucciones de instalación utilizando todas las opciones por defecto. 
+- En Windows, se instalarán las versiones de 32 y 64 bits. Se recomienda el uso de la versión de 64 bits, a no ser que se quiera utilizar algún paquete específico solo disponible para 32 bits.
+- Es posible copiar el directorio completo en el que se ha instalado R en una memoria USB o un disco duro y ejecutar los ejecutables de R desde allí. Es útil para ejecutar R en una máquina donde no se tienen privilegios de administrador. 
+
+- Instrucciones para Mac Os X: <https://www.r-bloggers.com/installing-r-on-os-x/>
+- Instrucciones para Linux: <http://www.tuxylinux.com/instalar-r-en-linux/>
+
+
+### RStudio
+
+R dispone de una consola de trabajo, sin embargo es más cómodo su uso desde un entorno de desarrollo. 
+
+RStudio es un entorno de desarrollo integrado (IDE) para R. Incluye una consola, un editor con resaltado de sintaxis que soporta la ejecución directa de código, así como herramientas para representar gráficos, depuración de código, gestión de paquetes entre otras muchas funcionalidades. Está pensado para optimizar el trabajo de análisis interactivo de datos y la programación estadística. 
+
+Descarga de RStudio:  <https://www.rstudio.com/products/rstudio/download>.
+
+![Captura de pantalla de  Rstudio](img/CapturaRstudio.png)
+
+
+### Ejecutar R online
+
+Si no puedes instalar R, puedes probar, al menos algunas de sus funcionalidades, a través de diferentes proveedores de R online. Estos son algunos ejemplos
+
+- <http://www.r-fiddle.org>
+- <http://www.tutorialspoint.com/execute_r_online.php>
+- <http://pbil.univ-lyon1.fr/Rweb/Rweb.general.html>
+
+También es posible ejecutar R desde el móvil, desde la aplicación Telegram, uniéndote al canal @tele_r
+
+
+### Qué es y por qué *R*
+
+R es un sistema para  análisis estadístico, manipulación y  análisis de datos,  simulación  y representación gráfica creado por Ross Ihaka y Robert Gentleman en 1993. 
+
+R más que un software estadístico puede considerarse como un lenguaje de programación en el que podemos programar nuestros procedimientos propios y aplicaciones. R  deriva  del lenguaje S creado por los Laboratorios AT&T Bell. 
+
+Hoy en día el lenguaje R ha traspasado las fronteras de la estadística y es posible realizar casi cualquier cosa desde él. 
+
+Es software de código abierto con licencia GNU-GPL, y además es gratuito. Sin embargo tiene un fuerte equipo que lo desarrolla y mantiene (el core group está formado por más de 20 personas actualmente) y todos su desarrollos han sido masivamente probados. Para ver la información sobre el equipo de desarrollo podemos teclear contributors() desde la consola de R o Rstudio.
+
+R es el "estándar de facto" en computación estadística. Entre algunas de las grandes virtudes de R encontramos:
+
+- Grandes capacidades gráficas.
+
+- Miles de paquetes extienden su funcionalidad
+
+- Gran comunidad de desarrolladores e usuarios. Es fácil obtener ayuda de los expertos a través de listas de correo, foros o redes sociales. 
+
+- Muchos paquetes orientados al modelado estadístico y al *"machine learning"*
+
+- Generación de documentación automática/reproducible (Rmarkdown) y aplicaciones web (shiny)
+
+- Integración con herramientas Big Data: Hadoop, Spark, etc.
+
+
+### Paquetes
+
+R es un proyecto colaborativo y su principal virtud es la cantidad de paquetes disponibles que amplían sus funcionalidades. En la actualidad, hay casi 10000 indexados en CRAN (Comprehensive R Archive Network) y sigue creciendo a buen ritmo. La lista completa está en <http://cran.es.r-project.org/web/packages/>
+
+En la instalación por defecto de R  además del paquete *base* que contiene las funciones fundamentales para su funcionamiento, encontramos otros paquetes como: *utils , stats , datasets , graphics ,grDevices , grid , methods , tools , parallel , compiler , splines , tcltk , stats4*.
+
+Además se incluyen una serie de paquetes recomendados  como *boot , class , cluster , codetools , foreign , KernS-mooth , lattice , mgcv , nlme , rpart , survival , MASS , spatial , nnet , Matrix*.
+
+
+Además de los paquetes oficiales, existen paquetes en desarrollo disponibles habitualmente a través de  GitHub (<https://github.com>)
+
+```{r, eval=FALSE}
+library(devtools)
+install_github("cjgb/caRtociudad")
+```
+
+También pueden desarrollarse paquetes para uso personal o corporativo sin necesidad de ser compartidos con la comunidad. 
+
+
+A lo largo de este curso emplearemos un buen número de paquetes, como podremos ver, de gran utilidad.
+
+**Autotexto Ojo al dato**
+La siguiente figura muestra el crecimiento de paquetes registrados en CRAN a lo largo de su historia
+
+![](img/rpackages.png)
+
+**Fin Autotexto**
+
+
+
+### Referencias
+
+Os resumimos aquí algunas referencias donde obtener información y aprender más sobre R 
+
+**Documentación oficial de R**
+
+- <https://cran.r-project.org/manuals.html>
+
+Especialmente 
+
+- Introducction to R: <https://cran.r-project.org/doc/manuals/r-release/R-intro.html>
+
+**Webs/Tutoriales**
+
+- <http://www.burns-stat.com/documents/tutorials/impatient-r/>
+- <http://www.r-tutor.com/r-introduction>
+
+**Blogs**
+
+- R-bloggers: <http://www.r-bloggers.com/>
+- Datanlytics: <https://www.datanalytics.com/>
+
+
+**Comunidad**
+
+- Listas de correo: <small> <http://www.r-project.org/mail.html> </small> 
+- Stackoverflow: <small> <http://stackoverflow.com/questions/tagged/r> </small>
+- Asociación R-hispano  <small> <http://r-es.org/> </small>
+- Grupos de usuarios locales: <small> <http://r-es.org/grupos-locales/> </small>
+
+**Libros**
+
+- R para Principiantes, Emmanuel Paradis <small>  <http://cran.r-project.org/doc/contrib/rdebuts_es.pdf> </small>
+- R Programming for Data Science, Roger D. Peng <small>  <http://leanpub.com/rprogramming> </small>
+- icebreakeR: <small> <http://www.ms.unimelb.edu.au/~andrewpr/r-users/icebreakeR.pdf> </small>
+- Introduction to Probability and Statistics Using R, G. Jay Kerns. Se obtiene en formato pdf descargando el paquete "IPSUR" desde R.
+
+
+## Primeros pasos en R
+
+Este apartado es muy importante y muy práctico. ¿Te gustaría que te hiciésemos una presentación de viva voz ?
+
+**Autotexto Video**
+Entra en Campus y allí encontrarás un vídeo de esta sección que te ayudará mucho con tus primeros pasos en R.  
+**Fin Autotexto**
+
+### Rstudio 
+
+Exploremos en primer lugar el entorno de desarrollo Rstudio que vamos a utilizar a lo largo del curso.  
+
+![Areas de trabajo de  Rstudio](img/CapturaRstudio.png)
+
+
+- La **consola de R** es el área en la que se ejecuta código (`Ctrl + 1`)
+     - Indica con > que está listo para aceptar comandos.
+     - Indica con + que está a la espera de completar
+     - Salir o interrumpir ejecución con Esc
+     - Se puede recuperar comandos antiguos con flechas arriba y abajo.
+
+- El **área de código** es donde se edita y almacena código (`Ctrl + 2`)
+     - Escribir (y grabar) en área de código y enviar a consola (`Ctrl + Enter`)
+     - Permite completar comandos con Tab
+     
+-  En los paneles laterales podemos explorar el espacio de trabajo (Workspace), el historial de comandos (History), las gráficos realizados (Plots), la ayuda (Help), entre otras cosas. 
+
+- Mas ayuda sobre el uso de Rstudio en <https://support.rstudio.com/hc/en-us/sections/200107586-Using-RStudio>
+
+
+### Sesión de ejemplo
+
+Antes de empezar conocer los detalles de R hagamos una sesión de ejemplo que te va a permitir hacerte una idea del funcionamiento general de la herramienta de su potencial.
+
+
+```{r,eval=FALSE}
+# Ejecuta línea a línea desde el area de consola de Rstudio los siguientes comandos
+
+# Para poner comentarios en el código se utiliza #
+# El intérprete de R ignora todo aquello precedido del símbolo #
+
+# La utilidad más sencilla de R es como calculadora
+
+5+7
+23*54
+2^5
+log(pi/2)
+sqrt(3)
+exp(2)
+
+# La estructura más sencilla de datos es un vector numérico
+# Podemos crear un vector como
+
+x=c(1,2,5,7)
+x
+
+# o como una secuencia ordenada de números
+
+y=1:4
+y
+# O a partir de un generador de números aleatorios
+z=runif(4,0,10)
+z
+# Puedo redondear estos números 
+z=round(z,0)
+
+#  Las operaciones en R son vectoriales, en el sentido de que se realizan por defecto elemento a elemento
+x+y
+x+y+x
+x*y
+z^x
+
+# Veamos un ejemplo más complejo
+# Generamos un vector con los números del 1 a 100
+# Observemos que  como operador de asignación R utiliza <-
+x<-1:100
+#Mostremos los 5 primeros valores de x
+x[1:5]
+
+# Generemos una variable y, relacionada linealmente con x, y con residuos aleatorios distribuidos según una distribución normal
+y=3*x -12
+# Generemos un vector con números aleatorios distribuidos normalmente con media 0 y desviacion típica 20
+z=rnorm(100,mean=0,sd=20)
+# Añadimos el error aleatorio a la variable y
+y=y+z
+
+# Representemos la variable y frente a la x en un gráfico de dispersión
+plot(x,y)
+# Algo más bonito
+plot(x,y,pch=19,col="red",cex=0.5,main="x vs y")
+
+# Construimos una tabla de datos (data.frame) que contenga a x e y
+df=data.frame(x,y)
+# Mostremos su contenido
+View(df)
+# Añadimos una nueva columna al data.frame que represente una categoría a la que pertenecen las observaciones
+# Hacemos un muestreo aleatorio de 100 extracciones de dos posibles bolas "a" y "b"
+z=sample(c("a","b"),100,replace = TRUE)
+z
+#Añado la columna
+df=cbind(df,z)
+# Plot coloreado según la categoría de los puntos
+plot(df$x,df$y,pch=19,col=df$z,cex=0.5,main="x vs y")
+
+# Ajustemos los puntos a un modelo lineal Y=a + b*X + eps
+# Los coeficientes ajustados a y b deberian corresponder con los que hemos usado en la generación de los puntos
+# a=-12 ; b=3
+mod = lm(y~x,data=df)
+?lm
+mod
+summary(mod)
+str(mod)
+
+# dibujamos la recta ajustada
+plot(df$x,df$y,pch=19,col="red",cex=0.5)
+abline(a=mod$coefficients[1],b=mod$coefficients[2])
+
+```
+
+
+### Paquetes 
+
+Para instalar un paquete se usa el comando `install.packages`
+
+Instalemos algunos paquetes que vamos a usar a lo largo de este curso
+
+```{r,eval=FALSE}
+install.packages("ggplot2")
+# Pueden cargarse varios paquetes a la vez
+install.packages("reshape2","dplyr","ISLR")
+```
+
+Para cargar paquetes usamos el comando `library`
+
+```{r,eval=FALSE}
+# R contiene muchos conjuntos de datos disponibles como mtcars
+# Si quieres saber que contiene exactamente este conjunto teclea ?mtcars
+# ggplot2 es paquete para la realización de gráficos de alta calidad
+
+library(ggplot2)
+ggplot(mtcars) + geom_point(aes(wt, mpg,color=factor(cyl)))
+ggplot(mtcars) + geom_point(aes(wt, mpg,color=factor(cyl))) + facet_wrap(~am)
+```
+
+También pueden llamarse a funciones contenidas en un paquete sin necesidad de cargarlo, anteponiendo al nombre de la función `nombredelpaquete::`
+
+```{r,eval=FALSE}
+# Calculo la media de la variable wt (peso en miles de libras) del conjunto de datos mtcars
+dplyr::summarise(mtcars,wtm=mean(wt))
+```
+
+Podemos ver que paquetes están cargados con 
+
+```{r}
+search()
+```
+
+y con más detalle con
+
+```{r,eval=FALSE}
+sessionInfo()
+```
+
+### Ayuda en R
+
+Desde la consola de R existen muchas formas de pedir ayuda sobre una función
+
+La más sencilla es anteponiendo el símbolo de interrogación al nombre de la función sobre la cual se quiere pedir ayuda
+
+```{r}
+?read.table
+```
+
+Esto es equivalente a 
+  
+```{r}
+help(read.table)
+```
+  
+Para buscar de forma más amplia, no solo por nombre de función usamos *??*
+
+```{r,eval=FALSE}
+??plot
+```
+
+o equivalentemente
+
+```{r,eval=FALSE}
+help.search("plot")
+```
+
+**Autotexto Pista o similar**
+Si al principio no entiendes muy bien el contenido de la ayuda, no desesperes, ve al final donde encontraras ejemplos de uso de la función que seguramente te ayudarán a entender mejor el funcionamiento de la función.  
+**Fin autotexto**
+
+Muchas funciones, además de la documentación sobre su uso, incorporan demostraciones con varios ejemplos de uso. 
+Estos pueden verse mediante el comando example
+
+```{r,eval=FALSE}
+example(plot)
+```
+
+Desde Rstudio también se puede pedir ayuda utilizando el panel lateral *"Help"*
+
+![](img/help_rstudio.png)
+
+
+### Explorar la sesión
+
+Es posible explorar los objetos almacenados en la sesión de R mediante
+
+```{r, eval=FALSE}
+ls()
+```
+
+Para borrar un objeto
+
+```{r}
+x <- 3
+rm(x)
+```
+
+En Rstudio es posible explorar los objetos almacenados en la sesión de R mediante el panel lateral *"Enviroment"*
+
+### Directorio de trabajo
+
+Un concepto importante en R, es el directorio de trabajo (working directory). Cuando se inicia R, el directorio de trabajo se establece según el valor configurado por defecto. Habitualmente es el directorio de usuario por defecto del sistema operativo, en Windows sería típicamente `c:\\Users\\nombredeusuario` y en Linux o Mac `/home/nombredeusuario`. Aunque estemos trabajando en Windows, R entiende las rutas al estilo Linux, lo cual recomendamos por simplicidad. 
+
+El directorio de trabajo, será el origen por defecto de las rutas de archivos que utilicemos para leer y escribir ficheros.
+
+Desde la consola de R, los comandos para conocer y cambiar el directorio de trabajo son `getwd` y `setwd` respectivamente.
+
+```{r, eval=FALSE}  
+setwd("c:/masterd/CursoBigData/02_introduccionR/")
+getwd()
+```
+
+Desde RStudio podemos conocer el directorio de trabajo, leyendo la barra superior del área de consola. Es posible cambiar su ubicación a partir de la pestaña Files de los paneles laterales. 
+
+
+### Guardar
+
+Es posible guardar, en formato binario, el contenido un objeto mediante el comando `save` 
+
+```{r}
+save(iris,file="iris.Rdata")
+```
+
+Este objeto puede cargarse en la misma u en otra sesión de R, incluso en una maquina distinta mediante el comando `load`
+
+```{r,eval=FALSE}
+load("iris.Rdata")
+```
+
+Es posible guardar la sesión entera mediante
+
+```{r}
+save.image("sesion.RData")
+```
+
+R al terminar una sesión pregunta si quiere guardar la sesión. En caso afirmativo, lo hace en un fichero llamado `.RData` en el directorio de trabajo.
+
+R al iniciarse carga automáticamente (si no se le dice lo contrario) el fichero `.RData`, si existe, en el directorio desde el que se lanza, por defecto el directorio de usuario del sistema operativo. 
+
+Es igualmente posible cargar una sesión mediante el comando load, de la misma manera que se carga un objeto.
+
+```{r,eval=FALSE}
+load("sesion.Rdata")
+```
+
+
+# Objetos en R
+
+En las secciones anteriores hemos creado estructuras de datos (objetos). Lo hemos hecho mediante el operador de asignación `<-`
+(Se puede usar igualmente el operador = para la asignación, aunque se recomienda el uso de `<-` ). 
+
+```{r,eval=FALSE}
+x <-1
+z <-c(2,3,4)
+mod <- lm(y~x,data=df) 
+```
+
+En esta sección vamos a ver con más detalle el tipo de objetos existen en R.
+
+## Vectores
+
+La clase de objeto básico en R es el **vector (atómico)**. Se trata de un conjunto de datos del mismo tipo. Existen 5 tipos distintos de vectores: 
+
+- character (texto)
+- numeric (números reales)
+- integer (números enteros)
+- logical (TRUE/FLASE)
+- complex (números complejos)
+
+<br>
+```{r}
+# vector tipo character de longitud 1
+x1<- "Hola"  
+typeof(x1)
+length(x1)
+# vector tipo character de longitud 4
+x2<- c("Juan","Pablo","Enrique","Javier")
+typeof(x2)
+length(x2)
+# Vector numeric/double
+x3 <- c(1.2,5,3/4)
+typeof(x3)
+length(x3)
+# Vector integer
+x4<- 1L
+typeof(x4)
+length(x4)
+# En cambio sin la L es numeric 
+x5<-1
+typeof(x5)
+length(x5)
+
+# Vector lógico
+x6<- c(TRUE,FALSE,FALSE,FALSE)
+typeof(x6)
+length(x6)
+
+```
+
+La función `c` que hemos usado para crear vectores es el operador concatenación y su cometido es poner cosas juntas
+
+
+```{r}
+# Sirve para definir vectores a partir de elementos
+x <- c(1,5,6)
+y <- c(7,1,3)
+# Pero tambien concatena objetos ya existentes
+z<- c(x,y)
+z
+```
+
+Es destacable que en *R* no existen variables escalares (un único valor), son un caso particular de vectores con longitud 1. 
+
+- El comando `typeof` nos dice el tipo de datos que contiene el vector y 
+- El comando `length` nos dice el número de elementos del vector
+
+
+## Generación de vectores
+
+Veamos  diferentes formas de generar vectores en R 
+
+```{r}
+x <- 3; x
+```
+
+Secuencia ordenada
+
+```{r}
+y <- 1:5; y
+```
+
+Secuencia Lineal
+
+```{r}
+z <- seq(0,5,by=0.5); z
+```
+
+Concatenación
+
+```{r}
+t <- c(x,y,z); t
+```
+
+### Vectores Aleatorios
+
+A lo largo del curso, para poner ejemplos o para explicar algunos conceptos estadísticos necesitaremos poder generar vectores a partir de secuencias de números pseudo-aleatorios, o tomar muestras aleatorias de datos ya existentes. 
+
+**Autotexto +info**  
+En ciencia de datos es habitual realizar simulaciones de procesos probabilísticos en las cuales es fundamental la generación de números aleatorios. En realidad no se trata de números aleatorios reales, son cadenas de números pseudo-aleatorios que se generan mediante una fórmula matemática precisa pero, sin embargo los números generados, tienen propiedades matemáticas muy similares a los números aleatorios reales 
+**Fin autotexto**  
+
+
+```{r}
+# Generación de vectores aleatorios
+# Uniformes en el intervalo (0,1)
+(x<- runif(10,0,1))
+# Normalmente distribuidos
+(y<- rnorm(10,mean=0,sd=1))
+# Muestreos
+(z1<- sample(1:20,10,replace=TRUE))
+(z2<- sample(1:20,10,replace=FALSE))
+```
+
+Observad que poniendo una expresión de R, que sea una asignación de un valor a una variable entre paréntesis, además de realizar la asignación escribe el valor asignado en la consola. 
+
+### Vectores de Texto
+
+Veamos algunas formas de generar vectores de texto
+
+```{r}
+# Concatenación de cadenas - La función paste es muy importante
+str1 <- paste("A", 1:6, sep= "")
+str1
+# Repetición
+str2 <- rep("b", 5)
+str2
+str3 <- rep(letters[1:5], 3)
+str3
+# Muestreo
+sample(letters, 5, replace=TRUE)
+# Observad que cada vez se generan nuevos valores
+sample(letters, 5, replace=TRUE)
+```
+
+### Operaciones Básicas con Vectores
+
+Las operaciones vectoriales en R se realizan elemento a elemento
+
+```{r}
+  x <- 1:4
+  x + 1
+  x^2
+  y <- 1:8
+  # Ojo al reciclaje. x se convierte en c(1:4,1:4) para poder sumar con y
+  x + y
+  x * y
+  x^3 + sqrt(y)
+
+```
+
+### Operaciones a través de funciones
+
+R dispone de un gran número de funciones que nos permiten realizar operaciones con vectores. Algunos ejemplos son 
+
+|Función| Descripción                                                 |
+|-------|-------------------------------------------------------------|
+|sum(x) |suma de los elementos de x|
+|prod(x)|producto de los elementos de x|
+|max(x)|valor máximo en el objeto x|
+|min(x)|valor mínimo en el objeto x
+|which.max(x)| devuelve el índice (posición) del elemento máximo de x|
+|which.min(x)|devuelve el índice (posición) del elemento mínimo de x|
+|range(x)|rango de x o c(min(x), max(x))|
+|length(x)|número de elementos en x|
+|mean(x)|promedio de los elementos de x|
+|median(x)|mediana de los elementos de x|
+|round(x, n)|redondea los elementos de x a n cifras decimales|
+|rev(x)|invierte el orden de los elementos en x
+|sort(x)|ordena los elementos de x en orden ascendente|
+|rank(x)|devuelve un vector con la posicion de los elementos de  x en un vector ordenado|
+|log(x, base)|calcula el logaritmo de x en base "base"|
+|pmin(x,y,...)|un vector en el que el iesimo elemento es el mínimo de x[i], y[i], . . |
+|pmax(x,y,...)|igual pero con el máximo|
+|cumsum(x)|suma acumulada: un vector en el que el iesimo elemento es la suma desde x[1] a x[i]|
+|cumprod(x)|lo mismo pero con el producto|
+|cummin(x)|lo mismo pero con el mínimo|
+|cummax(x)|lo mismo pero con el máximo|
+|choose(n, k)|combinaciones de n elementos tomados de k en k|
+
+Veamos algunos ejemplos de uso
+
+```{r}
+# Genero 20 números aleatorios entre 0 y 100
+set.seed(123)
+x=runif(20,0,100)
+x
+sum(x)
+mean(x)
+length(x)
+min(x)
+max(x)
+round(max(x),1)
+log(x[1])
+sort(x)
+median(x)
+sort(x)[10:11]
+mean(sort(x)[10:11])
+cumsum(x)
+pmin(c(1,5,7),c(2,3,6))
+which(x<20)
+which.max(x)
+x[which.max(x)]
+```
+
+
+### Atributos
+
+Los objetos de R además de valores, tienen atributos, que son como metadatos del objeto. 
+Estos metadatos pueden ser muy útiles en algunos casos que veremos. Algunos ejemplos de atributos son:
+
+- nombres
+- dimensiones (por ejemplo en matrices y arrays)
+- longitud
+- niveles de una variable tipo factor
+
+Los atributos de un objeto se pueden ver mediante el comando `attributes`. No todos los objetos de R contienen atributos, en este caso la función `attributes` devolvería NULL
+
+
+## Otros objetos en R
+
+Los vectores son el tipo básico de objeto en R, pero existen más tipos de datos como 
+
+-  Las **matrices (matrix)**  o, de forma general, los arrays  son generalizaciones
+multidimensionales de los vectores.
+- Los **factores** que sirven para representar datos categóricos.
+- Las **listas** son una forma generalizada de vector en las cuales los elementos no tienen
+por qué ser del mismo tipo. A menudo los elementos de una lista son a su vez vectores u otras listas. A partir de listas y atributos podemos construir objetos todo lo complicados que queramos.
+- Los  **data frames** son estructuras similares a una matriz, en la que cada
+columna puede ser de un tipo distinto a las otras. Los data frames son apropiados
+para describir "matrices de datos" donde cada fila representa a una observación y cada
+columna una variable, pudiendo ser estas de diferente tipo: numéricas o categóricas.
+- Las **funciones** son también objetos de R.
+
+Las estructuras de datos en R se pueden clasificar según su dimensión (1d, 2d, o más dimensiones (nd))  y por si son homogéneas (todos los contenidos deben ser del mismo tipo) o heterogéneas (los contenidos pueden ser de distinto tipo) de la siguiente manera.
+
+
+```{r, echo=FALSE,eval=TRUE}
+
+library(knitr)
+kable(data.frame('Homogéneos'=c("(Atomic) vector","Matrix","Array"),
+                 'Heterogéneos' =c("List","Data Frame",""),row.names = c("1d","2d","nd")))
+
+```
+
+### Factores
+
+Un *factor* es un tipo de dato que se usa para representar variables categóricas. Los factores son necesarios para la definición de "modelos estadísticos" con variables categóricas. 
+
+En realidad es un dato tipo entero con un atributo llamado *levels* que hace una correspondencia entre las posibles categorías y números enteros. Los factores parecen, y a veces se comportan como vectores de texto,pero en realidad son números enteros.
+
+Veamos un ejemplo 
+
+```{r}
+# genero un vector de longitud 10, donde cada elemento puede ser a,b o c
+str<- sample(letters[1:3],10,replace=TRUE); str
+# Convierto el vector de texto str a factor
+fac <- factor(str); fac
+levels(fac)
+# Clase del objeto
+class(fac)
+# Tipo de dato (es integer)
+typeof(fac)
+# Si queremos verlo como numérico
+as.numeric(fac)
+```
+
+Los objetos en R pueden tener un atributo llamado `class`, como es el caso de los factores. En este caso cuando una función genérica (llamémosle `fun`) se aplica a un un objeto perteneciente a una clase `miclase`, el sistema busca una función `fun.miclase` y si la encuentra se la aplica al objeto. 
+
+
+
+### Listas
+
+Colección de objetos de distinto tipo y  de diferente longitud. 
+
+```{r}
+
+mylist <- list(a = c(10,20,30),
+              b = c('do', 're', 'mi', 'fa', 'sol','la','si'),
+              c = matrix(1:9,nrow=3))
+mylist
+
+class(mylist)
+length(mylist)
+```
+
+La  lista del ejemplo contiene un vector numérico, un vector tipo character y  una matriz, cada uno de un tamaño distinto. 
+
+Una lista puede estar compuesta por otras listas 
+
+```{r}
+mylist1 <- list(a = c(10,20,30),
+              b = c('do', 're', 'mi', 'fa', 'sol','la','si'))
+mylist2 <- list(x=1:10,y=11:25)
+# Lista de listas
+mylist3= list(mylist1,mylist2)
+mylist3
+```
+
+### Matrices
+
+Una matriz es un vector pero indexado en dos dimensiones (filas y columnas). Veamos un ejemplo
+
+```{r}
+z <- 1:12
+M <- matrix(z, nrow=3)
+M
+
+#clase
+class(M)
+#dimensión  
+dim(M)
+#resumen
+summary(M)
+```
+
+La función summary es una función genérica que proporciona un resumen de los datos. En función del tipo de dato realiza acciones diferentes. En el caso de una matriz ejecuta realmente la función summary.matrix
+
+### Creando matrices a partir de vectores rbind y cbind
+
+Puedo crear matrices concatenando vectores por filas o por columnas
+
+```{r}
+x <- 1:5
+y <- 6:10
+z <- 11:15
+# Concatenación por columnas
+M <- cbind(x, y, z)
+M
+# Concatenación por filas
+M <- rbind(x, y, z)
+M
+
+```
+
+
+### Operaciones con matrices
+
+Veamos algún ejemplo de operaciones con matrices
+
+```{r}
+# Traspuesta (cambio filas por columnas)
+TM <- t(M)
+TM
+# Suma
+B=T + TM
+# Producto de matrices
+C=M %*% TM
+C
+# Matrices de texto
+M[1,1] <- "un poco de texto" 
+M
+```
+
+
+### Data Frames
+
+Colección de objetos de igual longitud. Una fila por observación, una columna por variable. Las columnas pueden ser de distintos tipos: character,factor, integer, numeric, etc ...
+
+Los data frames son el  modo más habitual de almacenar datos en R y se usan continuamente.
+
+```{r}
+df <- data.frame(a=letters[1:5], x = 1:5,
+                   y = rnorm(5), z = 0)
+df
+length(df)
+dim(df)
+summary(df)
+```
+
+## Funciones
+
+### Definición y aplicación
+
+Las funciones en R nos permiten personalizar el código y ampliar sus capacidades.
+
+Para definir una función usamos el comando *function*
+
+```{r}
+# Definición
+CircleArea <- function(r) { 
+  pi*r^2
+}
+
+# La función es un objeto
+CircleArea
+class(CircleArea)
+
+# Aplicación
+
+CircleArea(5)
+
+```
+
+
+Las funciones por defecto operan vectorialmente
+
+```{r}
+x=runif(10, min=0, max=5)
+x
+CircleArea(x)
+```
+
+
+
+y pueden devolver cualquier tipo de objeto
+
+```{r}
+foo  <-  function(x, y){
+  mx <- mean(x)
+  sdx <- sd(x)
+  lmod=lm(y~x)
+  list(mx=mx, sdx=sdx, mod= lmod)
+  }
+
+foo(1:10,1:10 + rnorm(10))
+```
+
+### Argumentos
+
+Una función identifica sus argumentos por su nombre y por su orden (sin nombre)
+
+```{r}
+potencia <- function(x, exp)
+{
+    x^exp
+}
+# orden
+potencia(1:10, 2)
+# nombre
+potencia(x=1:10, exp=2)
+potencia(exp=2, x=1:10)
+
+```
+
+R permite  asignar un valor por defecto a los argumentos
+
+```{r}
+potencia <- function(x, exp = 2)
+{
+    x ^ exp
+}
+potencia(5)
+potencia(5,2)
+```
+
+También es posible definir funciones sin argumentos
+
+```{r}
+hola <- function()
+{
+    print('Hola fondo norte')
+    print('Hola fondo sur')
+}
+
+hola()
+
+```
+
+
+Existen un tipo especial de argumentos denotados por `...` que suelen emplearse para permitir pasar argumentos opcionales a otras funciones a las que está llamando nuestra función  
+
+```{r}
+sqrootSum <- function(x, ...)
+{
+    sum(x ^ (1/2), ...)
+}
+
+x <- seq(-5,5,1)
+sqrootSum(x)
+sqrootSum(x,na.rm=TRUE)
+
+```
+
+Le estamos pasando a sqrootSum el argumento `na.rm=TRUE` que a su vez le está pasando a la función de R `sum`. Con esto conseguimos que no tenga en cuenta los valores erroneos en el cálculo que queremos que haga.
+
+En R no es necesario pasarle todos los argumentos a una función , es capaz de gestionar posibles argumentos ausentes con el comando  `missing`
+
+
+```{r,fig.height=4,fig.align='center'}
+myplot <- function(x, y) {
+                if(missing(y)) {
+                        y <- x
+                        x <- 1:length(y)
+                }
+                plot(x, y)
+}
+myplot(rnorm(10))
+```
+
+
+
+# Indexado de datos
+
+El indexado de datos, nos permite obtener subconjuntos de estos mediante condiciones.
+Los operadores para el  indexado de datos en R son muy potentes y es una de las principales virtudes del lenguaje. 
+
+## Indexado numérico
+
+Podemos seleccionar subconjuntos en los datos indicando las posiciones de los elementos que queremos seleccionar
+
+```{r}
+# Genero un vector x
+x <- seq(1, 100, 2)
+x
+# Seleciono el 3er elemento
+x[3]
+# Seleciono los cinco primeros elementos
+x[1:5]
+# Seleciono los elementos de la quinta a la décima posición en orden inverso
+x[10:5]
+```
+
+## Condiciones lógicas
+
+También es posible seleccionar datos mediante condiciones lógicas. 
+Primero veamos como funcionan los operadores lógicos
+
+```{r}
+x <- sample(c(-2,-1,0,1,2),20,replace=TRUE)
+x
+# x menor que 0. Devuelve TRUE en las posiciones que cumplen la condicion
+# y FALSE en las que no
+x < 0
+# x mayor o igual que 0
+x >= 0
+# x igual a 0
+x == 0
+# x distinto de 0
+x != 0
+```
+
+## Condiciones  lógicas múltiples
+
+Podemos realizar operaciones lógicas múltiples mediante los operadores lógicos: 
+
+- `&`  (y): se cumplen ambas condiciones
+- ` |`  (o): Se cumple alguna condición
+
+```{r}
+cond  <-  (x > 0) & (x <=1)
+cond
+
+cond  <-  (x >1) | (x < -1)
+cond
+
+```
+
+
+## Indexado con condiciones lógicas
+
+R permite el indexado mediante una condición lógica:
+
+- R realiza la operación lógica obteniendo un vector lógico con TRUEs y FALSEs
+- Selecciona las posiciones del dato que tienen TRUE en el resultado de aplicar la condición
+
+```{r}
+x <- 1:50
+# Dame los valores de x que sean distintos de 9
+x[x != 9]
+# Dame los valores de x que sean mayores de 20
+x[x > 20]
+y <- round(runif(10,1,100))
+y
+# Dame los valores de x que tambien estén en y
+x[x %in% y]
+# Dame los valores de x en las posiciones en las que y es mayor que 50
+x[y>50]
+
+```
+
+Con condiciones múltiples el funcionamiento es equivalente
+
+```{r}
+z <- seq(-5, 5, by = .5)
+z
+z[z < -3 | z > 3]
+
+cond <- (z >= 0 & z <= 4)
+cond
+z[cond]
+
+```
+
+Veamos un ejemplo práctico de uso de los operadores de selección
+
+3 jugadores juegan a los dados, tiran 10 veces cada uno
+
+```{r}
+# Fijo la semilla del generador de números aleatorios. De esta forma al ejecutarlo en tu ordenador obtendrás los mismos resultados que en el texto. Si cambias la semilla obtendras otros resultados, perfectamente válidos.
+set.seed(153)
+# Genero las tiradas: 30 valores aleatorios entre 1 y 6
+tirada = sample(1:6,30,replace=TRUE)
+tirada
+# Asigno las tiradas a los jugadores 1,2 y3. Las 10 primeras al jugador 1, las 10 siguientes al 2 y las últimas al 3
+jugador = rep(1:3,each=10)
+jugador
+#¿Cual es la suma de las tiradas del jugador 1
+sum(tirada[jugador==1])
+# ¿La suma de los jugadores 2 y 3 juntos?
+sum(tirada[jugador>1])
+# ¿La suma de los jugadores 1 y 3 juntos?
+sum(tirada[jugador==1 | jugador==3])
+#¿Qué jugador ha sacado más seises?
+t1 <- tirada[jugador==1]
+length(t1[t1==6])
+t2 <- tirada[jugador==2]
+length(t2[t2==6])
+t3 <- tirada[jugador==3]
+length(t3[t3==6])
+# El jugador 1 es el que más 6's,  ha sacado 2
+```
+
+## Indexado de matrices
+
+```{r}
+M=matrix(1:16,nrow=4)
+M
+M[1,2]
+M[3:4, ]
+M[1:2, 2:4]
+M[1, c(1, 3)]
+
+```
+
+## Indices negativos
+
+Indican que filas o columnas **no** seleccionar
+```{r}
+M[-1,]
+M[,-c(1, 2)]
+# Funciona igual con vectores
+x=1:10
+x[-(1:2)]
+```
+
+## Indexado de listas
+Para seleccionar elementos en listas, podemos hacerlo por su nombre
+
+```{r}
+mylist1 <- list(a = c(10,20,30),
+              b = c('do', 're', 'mi', 'fa', 'sol','la','si'))
+mylist$a
+```
+
+o por su índice
+
+```{r}
+#[] devuelve una lista de un elemento
+mylist[1]
+#[[]] devuelve el contenido del primer elemento de mylist
+mylist[[1]]
+```
+
+## Indexado de data frames
+
+Por su nombre (como una lista)
+```{r}
+df$x
+
+```
+Por su índice (como una matriz)
+```{r}
+df[1:2,]
+df[,1]
+
+```
+
+Es posible tomar subconjuntos de data frames mediante condiciones lógicas, pero eso ya lo aprenderemos más adelante en este curso
+
+
+# Control de flujo
+
+Ya hemos visto que R más que un software estadístico es un lenguaje de programación. La mayor potencia de un lenguaje de programación la encontramos en realizar tareas repetitivas mediante bucles (for, while) o poder controlar la ejecución de un programa mediante condiciones lógicas (if/else).
+
+## Bucles for
+
+Mediante un bucle for es sencillo realizar un cálculo repetitivo como la suma los cuadrados de los 100 primeros números naturales $\sum_{n=1}^{n=100} n^2$. Veamos como hacerlo en R
+
+```{r}
+sum=0
+for(i in 1:100){
+  sum = sum + i^2
+}
+sum
+```
+La variable i va tomando todos los valores en la secuencia 1:100 (1,2,3, ..., 100) y en cada paso añade $i^2$ a la variable *sum*.
+
+Notad que la sintaxis del bucle for es distinta a como se hace en los lenguajes  C o Java. Se parece en cambio a la del lenguaje Python.  
+
+A pesar de que la operación anterior se puede realizar mediante un bucle for,  R es mas eficiente operando vectorialmente. La forma óptima de hacer el cálculo anterior en R es
+
+```{r}
+sum((1:100)^2)
+```
+
+## Funciones  *apply
+
+En R,  suele ser más eficiente que los bucles for, usar  la familia de funciones \*apply para realizar cálculos repetitivos sobre los elementos de un vector, una matriz o una lista. Veamos algunos ejemplos de la familia de funciones `*apply`
+
+`lapply(x,FUN)` aplica la función `FUN` a los diferentes elementos de `x` y devuelve una lista de la misma longitud que `x`.
+
+`sapply` funciona de la misma manera pero devuelve un vector o una matriz, dependiendo del tipo de dato  que sea `x`, en lugar de una lista.
+
+```{r}
+# lapply devuelve una lista
+lapply(1:5, function(i){sum(1:i)})
+# sapply devuelve un vector
+sapply(1:5, function(i){sum(1:i)})
+```
+
+Comprobemos que las operaciones tipo apply son más eficientes que los bucles. El comando `system.time` mide el tiempo que dura la ejecución de un código determinado. 
+
+Aunque lo realmente rápido es usar funciones vectorizadas, si es posible
+
+```{r,cache=TRUE}
+N <- 20000
+
+# Bucle for
+system.time({
+  x=NULL
+  for(i in 1:N){
+    x[i]=sum(as.numeric(1:i))
+    }
+  })
+# sapply
+system.time({x1=sapply(1:N, function(i){sum(as.numeric(1:i))})})
+
+# función vectorial
+system.time({x2=cumsum(as.numeric(1:N))})
+```
+
+## Matrices
+
+Para realizar cálculos repetitivos por filas o columnas de matrices se usa la función `apply` 
+
+```{r}
+# suma de las filas
+apply(M, 1, sum)
+# de otra manera
+rowSums(M)
+# media de las columnas
+apply(M, 2, mean)
+colMeans(M)
+```
+
+Algunas tareas habituales como la suma de los elementos de una matriz por filas o columnas, tienen su función vectorial correspondiente como  `rowSums`y `colSums` que son más eficientes que `apply`.
+
+
+## Condiciones if - else
+
+Una condición del tipo 
+
+```{r,eval=FALSE}
+if cond1
+  expr1
+else
+  expr2
+```
+
+evalúa la condición lógica `cond1` y si es cierta ejecuta el código en `expr1`, en caso contrario ejecuta el código de `expr2`
+
+```{r}
+x <- rnorm(5);x
+y<- NULL
+for(i in 1:5){
+  if(x[i]>0){
+    y[i]=1
+  } else{
+    y[i]=-1
+  }
+}
+y
+```
+
+El bloque `else`, no es imprescindible
+
+```{r}
+x <- rnorm(5);x
+y<- rep(0,5)
+for(i in 1:5){
+  if(x[i]>0){
+    y[i]=1
+  }
+}
+y
+```
+
+En R, existe una versión vectorial de las condiciones if-else que debe usarse siempre que se pueda. 
+
+```{r}
+y=ifelse(x>0,1,-1)
+y
+```
+
+# Escribiendo un programa en R
+
+R es un lenguaje interpretado, por tanto los programas suelen denominarse *scripts* (guiones).
+Podemos crear un programa escribiendo nuestros comandos en un fichero de texto, que grabaremos con la extensión .R y después ejecutarlo desde la consola de R o Rstudio. 
+
+Desde Rstudio, creamos una ventana de script a partir del menú de la aplicación: File-> New  File -> R script
+Escribiremos el código en un fichero y lo grabaremos (File->Save) con el nombre, por ejemplo, miguion.R.
+
+Podemos escribir el programa usando cualquier otro editor de texto, pero Rstudio tiene una serie de funcionalidades que lo hacen especialmente apropiado para crear y ejecutar programas en R. 
+
+
+
+## Ejecución de programas en R
+
+Para ejecutar un programa de R podemos hacerlo de diversas formas.
+
+### source
+
+Podemos cargar código almacenado en un fichero mediante la función source
+
+```{r,eval=FALSE}
+source('../../scripts/calcula_factorial_10.R')
+```
+
+Desde Rstudio, es equivalente pulsar el botón Run desde la ventana de edición con el programa que queremos ejecutar abierto.
+
+### Desde terminal de comandos
+
+```{r,eval=FALSE}
+Rscript calcula_factorial_10.R
+
+R CMD BATCH  calcula_factorial_10.R
+
+```
+
+
+# Trabajando con datos en R
+
+En esta sección vamos a comenzar a trabajar con alguna de las funcionalidades que hacen de R uno de los programas más utilizados para el análisis de datos.
+
+## Directorio de trabajo
+
+Antes de comenzar con la lectura de ficheros de datos, es necesario conocer, y cambiar si fuera necesario, nuestro directorio de trabajo
+
+```{r, eval=FALSE}  
+# ¿Cual es mi directorio de trabajo?
+getwd()
+# Lo cambio si es necesario
+# setwd("c:/Uers/masterd/CursoBigData/02IntroduccionR/")
+```
+
+Desde la consola podemos consultar los ficheros existentes en un un directorio, filtrando por un determinado patrón o dentro de un subdirectorio.
+
+```{r}
+dir()
+dir(pattern='.Rmd')
+dir('Ejercicios')
+```
+
+### Lectura de ficheros
+
+El comando básico para la lectura de ficheros de datos estructurados en columnas es *read.table*. Lee los datos de un fichero de texto delimitado y los almacena en un data frame. 
+
+Para los ejemplos de esta sección vamos a utilizar un conjunto de datos con resultados, estadísticas y cuotas de apuestas de los partidos de la primera división de fútbol española. Estos datos son una versión simplificada de los que pueden descargarse de <http://football-data.co.uk/mmz4281/1617/SP1.csv>. El significado de cada una de las columnas podéis encontrarlo en <http://football-data.co.uk/notes.txt>. 
+
+```{r}
+# Antes de ejecutar el comando comprobad la ruta completa desde el directorio de trabajo
+# El separador de columnas es "," y la primera línea del fichero indica el nombre de las variables 
+
+fdata <- read.table(file="../Datasets/SP1_1617_red.csv",
+                        sep=",",header = TRUE)
+
+# Primeras líneas
+head(fdata)
+
+# Para ver la tabla en Rstudio
+# View(fdata)
+
+```
+
+## Lectura de ficheros delimitados
+
+En ocasiones es mejor usar  las funciones `read.delim` y `read.csv` que están basadas  en `read.table` pero con diferentes configuraciones por defecto. Consulta la ayuda de estas funciones para descubrir las diferencias. 
+
+```{r,eval=FALSE}
+?read.table
+read.delim
+read.csv
+```
+
+Es posible leer los ficheros directamente de Internet
+
+```{r}
+sp1  <- read.csv(file="http://football-data.co.uk/mmz4281/1516/SP1.csv")
+head(sp1,1)
+```
+
+
+También podemos leer datos tabulares desde el portapapeles del sistema operativo. 
+Si seleccionamos un texto en una hoja de cálculo, copiamos al  portapapeles y ejecutamos
+
+```{r,eval=FALSE}
+a <- read.table("clipboard", header=T, sep="\t")   
+# o
+a <- read.delim("clipboard", header=T, sep="\t")   
+```
+
+Existen comandos en R para la lectura de ficheros de texto a más bajo nivel como *readLines* o *scan* que no vamos a utilizar en el curso pero pueden ser útiles en algunas situaciones. 
+
+Para la lectura de ficheros muy grandes, se recomienda el uso del paquete `readr`.
+
+## Escritura de datos en un fichero
+
+Para escribir el contenido de un data frame en un fichero delimitado usamos el comando `write.table`.
+
+```{r}
+#Por ~ se entiende el directorio de usuario del sistema operativo
+write.table(fdata, file = "~/borrar.txt",sep=",")
+# Comprobad el fichero que se ha creado en vuestro ordenador
+```
+
+
+## Datos incluidos en paquetes
+
+Para el aprendizaje de R o para practicar con los diferentes modelos y análisis estadísticos, R trae de serie más de 100 conjuntos de datos en el paquete `datasets` y muchos más en otros paquetes.
+
+Podemos ver un resumen de los datos contenidos en el paquete `dataset` o en cualquier otro paquete como `ggplot2` con el comando `data`
+
+```{r}
+data()
+data(package='ggplot2')
+```
+
+
+## Más conjuntos de datos
+
+Otros conjuntos de datos interesantes se pueden encontrar en los siguientes en enlaces
+
+- Datos proporcionados por RStudio  
+<https://blog.rstudio.org/2014/07/23/new-data-packages/>
+
+- Kaggle <https://www.kaggle.com/datasets>
+
+- Fun Data for teaching: <https://bartomeuslab.com/2016/01/21/fun-data-for-teaching-r/>
+
+
+
+## Lectura de otras fuentes de datos
+
+En R es posible importar datos de numerosos formatos y fuentes distintas. Algunos ejemplos son:
+
+- Excel 
+- Web scrapping
+- Base de datos
+- Google Docs
+- APIS
+   - Twitter
+   - Geocoding
+
+### Lectura de Excel
+
+Es muy habitual encontrar tablas de datos en formato Excel. En R tenemos a disposición varios paquetes para leer datos desde Excel. 
+Veamos un ejemplo usando el paquete `readxl`
+
+```{r}
+library(readxl)
+# Leemos datos del precio del mercado ibérico mayorista de electricidad
+precio_md <- read_excel("../Datasets/precio_md.xls")
+# El paquete readxl almacena la tabla en un formato más avanzado de objeto llamado tbl_df.
+# Lo transformamos a un data.frame "normal"
+precio_md <-as.data.frame(precio_md)
+head(precio_md)
+```
+
+También es  posible realizar esta importación de datos usando los menús de Rstudio. 
+`File-> Import Dataset -> From Excel`
+
+## Indexado en data frames
+
+El sistema de indexado para data.frames, funciona por los mismos principios que vimos para vectores o matrices, veamos algunos ejemplos.
+
+### Filas y columnas
+
+Filas
+
+```{r}
+fdata[1:2,]
+```
+Filas y columnas
+
+```{r}
+fdata[1:3,2:3]
+```
+
+Nombres de columnas
+
+```{r}
+fdata[1:3,c("Date", "HomeTeam", "AwayTeam")]
+```
+
+
+### Valores Ausentes (NA's)
+
+Un concepto importante cuando se trabaja con datos son los valores ausentes, que siempre existen en casi cualquier recopilación de información. R etiqueta los valores ausentes como NA (not available), y muchas de sus funciones hacen un tratamiento especial de este tipo de datos
+
+Operar con NA siempre da NA 
+
+```{r}
+NA +1
+```
+
+A veces esto es un problema con el uso de funciones, pero R suele tener previsto que hacer con los NA 
+
+```{r}
+# Media de goles del equipo que juega en casa
+mean(fdata$FTHG)
+mean(fdata$FTHG,na.rm = TRUE)
+```
+
+Existe otro tipo especial de dato erróneo que es el NaN (not a number) que se utiliza para representar el resultado de operaciones matemáticas no definidas, como la raíz cuadrada de un número negativo
+
+```{r}
+sqrt(-1)
+# Sin embargo R si que maneja el concepto de infinito
+5/0
+```
+
+
+### Identificar NA's
+
+En R es posible comprobar la existencia de valores ausentes mediante las funciones  `anyNA` e `is.na`
+
+En el conjunto de datos de partidos de fútbol, la última fila tiene algunos valores NA ya que no se ha disputado el encuentro.
+
+```{r}
+# Detecta si hay algún NA
+anyNA(fdata)
+# Devuelve TRUE si el valor es NA y FALSE en caso contrario
+tail(is.na(fdata$FTHG))
+```
+
+## Indexado condicional
+
+El indexado condicional es muy interesante trabajando con data frames, ya que nos permite seleccionar, filtrar datos con múltiples condiciones y operar sobre estas selecciones.
+
+```{r}
+iris[iris$Sepal.Length <4.5,]
+iris[iris$Species=="virginica" & iris$Petal.Length > 6.5,]
+mean(iris$Petal.Width[iris$Species=="setosa"])
+mean(iris$Petal.Width[iris$Species=="virginica"])
+```
+
+## Indexado  con NAs
+
+Los NA dan problemas con el indexado de data frames
+
+```{r}
+selection <- fdata[fdata$FTHG>5 & 
+                         fdata$FTAG<1,]
+# Devuelve una fila con NA  
+selection
+
+# Es posible evitarlo con la condicion explícita de que no haya NA 
+selection <- fdata[!is.na(fdata$FTHG) & fdata$FTHG>5 & 
+                          !is.na(fdata$FTAG) & fdata$FTAG<1,]
+
+selection
+```
+ 
+Usando la función `which` para indexar se puede evitar tener que hacer las comprobaciones explícitas de la existencia de NAs
+
+```{r}
+idx <- which(fdata$FTHG>5 & fdata$FTAG<1)
+selection <- fdata[idx,]
+selection
+```
+
+
+### Subset
+
+Para facilitar la sintaxis del indexado podemos usar la función `subset`
+
+```{r}
+subset(iris, Species=="setosa" &  Sepal.Width > 4)
+subset(fdata,FTHG>5 & FTAG<1)
+# selecciono los datos de precio de España
+precio_esp <- subset(precio_md, geoname == "España")
+```
+
+## Manipulación de datos
+
+### Nombres de columnas
+
+Para obtener los nombres de las columnas de un data frame
+```{r}
+names(precio_md)
+```
+
+Cambio de nombre de variables
+
+```{r}
+names(precio_md) <- c("id","serie", "geoid","pais","precio_eurMw","datetime")
+head(precio_md,1)
+```
+
+### Transform
+
+Con la función `transform` podemos modificar de forma sencilla valores de variables existentes o crear nuevas variables en un data frame
+
+```{r}
+# Transformacion de unidades en el precio
+precio_md <- transform(precio_md, precio_eurKw = precio_eurMw/1000)
+# Transformo el campo de tiempo para que tenga un formato de serie temporal apropiado en R 
+#  Primero quito los : del indicador de la zona horaria
+precio_md <- transform(precio_md, datetime=gsub("\\:00$","00",datetime))
+# Convierto el datetime a un formato  del tipo fecha-hora
+precio_md <- transform(precio_md,datetime=as.POSIXct(datetime,format="%Y-%m-%dT%H:%M:%S%z"))
+
+head(precio_md)
+```
+
+### Categorizar datos
+
+La función `cut` convierte una variable numérica en categórica según una definición de intervalos
+
+```{r}
+# Con los datos de precios
+precio_md<- transform(precio_md, precio_cat= cut(precio_eurMw,c(0,45,60,75,90,Inf),include.lowest = TRUE))
+#Conteo de ocurrencias de variables categóricas
+table(precio_md$precio_cat)
+
+```
+
+### Re-etiquetado de variables
+
+Podemos cambiar las etiquetas de los niveles de un factor
+
+```{r}
+catvar=precio_md$precio_cat
+levels(catvar)
+levels(catvar) = c("Muy bajo","Bajo","Medio","Alto","Muy alto")
+head(catvar)
+head(precio_md$precio_cat)
+```
+
+
+Otra forma de reetiquetar las variables es usando una "lookup table" que consiste en un vector de texto cuyos elementos tiene nombre
+
+```{r}
+lut=c("[0,45]"="Muy bajo","(45,60]"="Bajo","60,75]"="Medio","(75,90]"="Alto","(90,Inf]"="Muy alto")
+catvar= precio_md$precio_cat
+catvar = lut[catvar]
+head(catvar)
+class(catvar)
+levels(factor(catvar))
+```
+
+## Cambio de formato de datos
+
+### Datos *wide* y datos *long*
+
+Existen dos formas básicas de organizar los datos:
+
+- datos **wide**: todas las variables se encuentran en diferentes columnas
+- datos **long**: los datos tienen unas variables para su identificación y las variables relevantes se almacenan por nombre y valor
+
+Veamos un ejemplo para aclarar el concepto
+
+```{r}
+wide=data.frame(id=1:4,var1=c(2,4.2,5.1,6),var2=c(5,4,5.5,6.3)) 
+wide
+long = data.frame(id=rep(1:4,2),variable=rep(c("var1","var2"), each = 4),
+        valor=c(2,4.2,5.1,6,5,4,5.5,6.3))
+long
+```
+
+### Paquete reshape2
+
+El paquete reshape2 nos permite transformar un conjunto de datos en formato *wide* a formato *long* y viceversa.
+
+```{r}
+if(!require(reshape2))
+  install.packages('reshape2')
+library(reshape2)
+```
+
+### Melt
+
+La función `melt` convierte de wide a long
+
+```{r}
+melt(wide, id.vars= c("id"),measure.vars=c("var1","var2"),
+     variable.name="variable",value.name = "valor")
+```
+
+### dcast
+
+La función `dcast` convierte de long a wide
+
+```{r}
+dcast(long, id ~ variable , value.var = "valor")
+```
+
+###  Agregación de datos con dcast
+
+Si la descomposición de dcast no es única se usan funciones de agregación
+
+```{r}
+head(airquality)
+aqm <- melt(airquality, id=c("Month", "Day"), na.rm=TRUE)
+dcast(aqm, Month ~ variable, fun.aggregate = mean, value.var = "value",
+      margins = c("Month", "variable"))
+```
+
+## Agregación de datos
+
+Aunque en la próxima sección veremos el paquete dplyr que proporciona un método muy sencillo y potente de realizar agregaciones de datos, veamos primero como hacerlo con las funciones del paquete base.
+
+### apply
+
+Ya vimos que la función `apply` realiza operaciones por filas o columnas de una matriz. Podemos aplicarla a un data frame
+
+
+```{r}
+# media de goles del local y el visitante
+apply(fdata[5:6],2,mean,na.rm=TRUE)
+```
+
+### aggregate
+
+La función aggregate es la apropiada para hacer agregaciones de variables condicionadas al valor de otras variables. Para especificar las variables que queremos usar para la agregación se una la sintaxis de fórmulas, que se usa en otras funciones de R como los modelos estadísticos (por ejemplo `lm`).
+
+```{r}
+# Media de cuotas de apuestas a ganador local en función del resultado real 
+# (H: ganador local;D: Empate;A: Ganador visitante)
+aggregate(B365H ~ FTR, data=fdata, FUN = mean)
+# # Mediana de cuotas de apuestas a ganador local en función la diferencia de goles
+aggregate(B365H ~ dif_goles, data=transform(fdata,dif_goles=FTHG - FTAG),FUN = median)
+```
+
+La fórmula "B365H ~ FTR" indica que queremos aplicar la función FUN a B365H para los diferentes valores que tome FTR. Los datos en el lado derecho de "~" deben ser de tipo discreto.  
+
+Es posible agregar en función de varias variables:
+
+```{r}
+tmp <- aggregate(B365H ~ FTR + HomeTeam  , 
+                 data=fdata,FUN = mean)
+head(tmp)
+
+
+```
+
+## Unión de data frames
+
+### merge
+
+Con merge podemos juntar tablas de datos a partir de valores coincidentes. Es el equivalente al JOIN en bases de datos SQL.
+
+Como ejemplo añadamos a los datos de precios, valores de demanda eléctrica
+
+```{r}
+
+demanda <-  read.csv("../Datasets/demanda_ene2017.csv",sep=";")
+demanda <- transform(demanda,datetime=as.POSIXct(datetime))
+names(demanda)[2] <- "demanda"
+precio_esp <- subset(precio_md,pais=="España")
+demanda <- merge(demanda,precio_esp,by="datetime")
+head(demanda)
+
+```
+
+Y podemos ver que los precios y la demanda están correlacionados
+
+```{r}
+aggregate(demanda ~ precio_cat,data=demanda,FUN=mean)
+```
+
+# Análisis de datos avanzado con dplyr
+
+Ya hemos visto en las secciones anteriores algunas de las potencialidades de  R para el trabajo con tablas de datos. 
+En esta sección vamos a aprender el uso del paquete `dplyr` que nos permitirá realizar complicados análisis de datos con una sintaxis muy sencilla y con gran eficiencia en tiempo de cálculo. 
+
+## Qué es dplyr
+
+El paquete *dplyr* tiene tres objetivos principales:
+
+ - Identifica las operaciones de manipulación de datos más importantes y convierte su uso en algo sencillo desde R. Es intuitivo y fácil de leer, especialmente por uso de sintaxis "encadenada"
+ - Es rápido, realizando las tareas en memoria, con las piezas claves de código escritas en C++.
+ - Utiliza la misma interfaz para trabajar sin importar si los datos están almacenados en un data data frame, un data table o una base de datos.
+
+`dplyr` implementa de forma eficiente  en R la estrategia  *split-apply-combine*, que consiste en dividir un conjunto grande de datos, aplicar una función a cada trozo y combinar todos los resultados. 
+
+
+## Funcionalidad
+
+A partir de 5 verbos básicos podemos hacer las manipulaciones más habituales que se hacen en un conjunto de datos: 
+
+  - `filter`
+  - `select`
+  - `arrange`
+  - `mutate`
+  - summarise
+  - Habitualmente con group_by
+
+Podeis encontrar más información sobre el paquete en: 
+
+- <https://github.com/hadley/dplyr>
+- <https://github.com/hadley/dplyr/blob/master/vignettes/>
+- <http://genomicsclass.github.io/book/pages/dplyr_tutorial.html>
+
+
+## Datos: IMDB
+
+Vamos a trabajar con un conjunto de datos de 5000 películas evaluadas en la Internet Movie Data Base (IMDB)
+
+```{r}
+imdb <- read.csv("../Datasets/imdb_movie_reduced.csv")
+
+# Trunco los títulos para una mejor legibilidad
+
+imdb$movie_title=substr(imdb$movie_title,1,30)
+# output
+head(imdb)
+
+# Para ver la tabla completa en Rstudio 
+# View(imdb)
+```
+
+## Tibble
+
+Un tibble es un tipo más general de data frame que utiliza el paquete dplyr. Las columnas de un tibble pueden ser vectores atómicos como  en un data.frame pero también pueden ser listas que contengan objetos más complicados como modelos, matrices u otros  data.frames 
+
+```{r, message=FALSE, warning=FALSE}
+# install.packages(dplyr)
+# Te recomendamos instalar el paquete tidyverse que  incluye dplyr, ggplot2 y otros muchos muy utiles que comparten una misma filososfia
+library(dplyr)
+imdb_tbl <- tbl_df(imdb)
+imdb_tbl
+```
+
+## Verbos principales
+
+Veamos la funcionalidad de los verbos principales del paquete. 
+
+### filter
+
+La función filter permite seleccionar filas mediante condiciones lógicas. Es equivalente a subset, aunque en filter las condiciones `&` se pueden separar con coma. 
+
+```{r}
+# Equivalente a subset(imdb,duration>150 & title_year==2015)
+filter(imdb,duration>150,title_year==2015)
+```
+
+Condiciones más complejas
+
+```{r}
+tmp <- filter(imdb,duration>180 & 
+                (title_year==2015 | title_year==2011))
+tmp
+```
+
+### select
+
+Seleccionar columnas por nombre, como el *select* de SQL
+
+```{r}
+tmp <- select(imdb, movie_title, imdb_score) 
+head(tmp)
+```
+
+
+o de forma más genérica mediante la función matches
+
+```{r}
+# Selecciona las columnas que incluyan en el nombre la cadena "likes"
+tmp <- select(imdb, matches("likes"))
+head(tmp)
+```
+
+
+### Encadenamiento (Pipelining)
+
+La forma habitual de encadenar operaciones con funciones es mediante el anidado. Sin embargo, en `dplyr` podemos encadenar operaciones con el operador `%>%`, que podemos pronunciarlo como "entonces" (then).
+En Rstudio podemos escribir el operador `%>%` tecleando Ctrl+Shift+M
+
+Veamos un ejemplo
+
+```{r}
+# Forma anidada
+select(filter(imdb,duration>180 & language !="English"),
+        movie_title, language,director_name,duration)
+# Encadenamiento -- Mucho más legible
+imdb %>% filter(duration>180 & language !="English") %>%
+    select(movie_title, language,director_name,duration)
+```
+
+### Arrange
+
+Cambia el orden de las filas. En el ejemplo ordena según la puntuación de la película (imdb_score)
+
+```{r}
+imdb %>% filter(duration>180 & language !="English") %>%
+    select(movie_title, language,director_name, imdb_score) %>% 
+      arrange(-imdb_score)
+
+# El - es para ordenar de mayor a menor, también puede usarse desc() 
+
+```
+
+
+### mutate
+
+Añadir nuevas variables o cambiar las ya existentes
+
+```{r}
+# Nota. Los select los hacemos unicamente por mejorar la legibilidad de los resultados
+# Añadimos nuevas variables
+imdb %>% select(movie_title,title_year,duration,imdb_score) %>% 
+              mutate(duration_hours=duration/60,
+                     stars=cut(imdb_score,c(0,2,4,6,8,10),labels = c("*","**","***","****","*****"))) %>% 
+                head(4)
+# Cambiamos una columna existente
+imdb %>% select(movie_title,title_year,imdb_score) %>% 
+              mutate(imdb_score=imdb_score/2) %>%
+  head()
+
+```
+
+### summarise
+
+- Convierte las variables a un valor único (media, mediana, suma, etc.)
+- Es útil normalmente agrupado con group_by
+
+Veamos algunos ejemplos
+
+```{r}
+imdb %>%  
+  summarise(dur.m = mean(duration,na.rm=TRUE), imdb_score.m=mean(imdb_score))
+
+imdb %>% group_by(language) %>% 
+  summarise(dur.m = mean(duration,na.rm=TRUE), imdb_score.m=mean(imdb_score))
+
+imdb %>% group_by(title_year) %>% 
+  summarise(dur.m = mean(duration,na.rm=TRUE), imdb_score.m=mean(imdb_score)) %>% 
+  arrange(-imdb_score.m)
+# Ojo arrange actúa sobre el resultado de summary
+```
+
+
+En summarise puede utilizarse cualquier función que devuelva un valor único, sea cual sea su origen: función de base, contenida en un paquete o definida por el usuario. 
+
+El paquete dplyr incorpora algunas funciones propias de gran utilidad como 
+
+- `n()` cuenta el número de filas
+- `n_distinct(vector)` cuenta el número de elementos únicos en el vector
+
+```{r}
+imdb %>% group_by(language) %>% 
+  summarise(num_films=n(),
+            num_directors= n_distinct(director_name)) %>% 
+  arrange(-num_films)
+```
+
+Veamos un ejemplo con una función definida por el usuario
+
+```{r}
+desviacion_tipica_media <-function(x){
+  sd(x,na.rm=TRUE)/sqrt(length(x))
+}
+
+imdb %>% group_by(title_year) %>% summarise(num_films= n(), mean_score=mean(imdb_score), mean_dev= desviacion_tipica_media(imdb_score)) %>% 
+  arrange(-title_year)
+```
+
+
+### summarise_each 
+
+`summarise_each` permite aplicar la misma función  a distintas columnas a la vez
+
+```{r}
+imdb %>% group_by(title_year) %>% 
+  summarise_each(funs(mean), imdb_score, budget,gross)
+
+```
+
+
+Se puede aplicar más de una función en `summarisse_each`
+
+```{r}
+
+imdb %>% group_by(language) %>% 
+  summarise_each(funs(mean,min,max), imdb_score)
+
+```
+
+## Agrupación
+
+### group_by
+
+Las operaciones de agrupación  pueden realizarse también con otras funciones distintas a summarise. 
+
+Por ejemplo `group_by` con `mutate` y `filter` son útiles en conjunción con  las llamadas "window functions" (como  `rank`, o `min(x) == x`). 
+
+Veamos ejemplos. Para cada año cojo las 3 películas mejor puntuadas
+
+```{r}
+imdb %>% filter(title_year>2013) %>% group_by(title_year) %>% 
+  mutate(ranks=rank(-imdb_score,ties="first")) %>% 
+    filter(ranks<=3) %>%
+      select(title_year,movie_title,imdb_score,ranks) %>% 
+      arrange(title_year,ranks)
+
+```
+
+Ahora,  para cada año cojo la mejor valorada incluyendo los empates
+
+```{r}
+imdb %>% filter(title_year>2013) %>% group_by(title_year) %>% 
+    filter(imdb_score==max(imdb_score)) %>%
+      select(title_year,movie_title,imdb_score) %>% 
+      arrange(title_year)
+```
+
+Por último escalo la puntuación para que dentro de cada año las puntuaciones vayan de 0 a 1, siendo 0 el mínimo y 1 el máximo
+
+
+```{r}
+tmp<- imdb %>% filter(title_year>2013) %>% group_by(title_year) %>% 
+    mutate(norm_score=(imdb_score-min(imdb_score))/(max(imdb_score) - min(imdb_score)))%>% 
+   select(title_year,movie_title,imdb_score,norm_score)
+
+tmp
+
+# Veamos con un summary que el código anterior hace lo que queriamos
+# No hace falta hacer el group_by(title_year) porque tmp ya es una tabla agrupada
+
+tmp %>% summarise(m=mean(imdb_score),mn=mean(norm_score),minn=min(norm_score),maxn=max(norm_score))
+
+```
+
+### Otras funciones útiles con group_by
+
+Es útil usar funciones de muestreo junto con group_by para tomar muestras que se repartan en los diferentes grupos. 
+
+- `sample_n(n)`: Muestrea n filas de data frame.
+
+- `sample_frac(frac)`: Muestrea una fracción frac del data frame.
+
+Mostremos 3 películas aleatorias en cada idioma
+
+```{r}
+imdb %>% filter(language %in% c("English","Spanish","French","German") ) %>% 
+  group_by(language) %>% sample_n(3,replace=FALSE) %>% select(language,movie_title,title_year)
+```
+
+
+Ahora mostremos un  1% aleatorio de las películas de cada año. Redondea las fracciones al entero más pŕoximo
+
+```{r}
+imdb %>% filter(title_year>2013) %>% 
+  group_by(title_year) %>% sample_frac(0.01) %>% select(title_year,movie_title)
+
+# Comprobemos que selecciona el número correcto cada año
+imdb %>% filter(title_year>2013) %>% 
+  group_by(title_year) %>% summarise(num=n(),perc1=round(0.01*num))
+```
+
+## Funciones de ventana
+
+Profundicemos un poco más en las funciones de ventana (o window functions)
+
+- Las funciones de agregación (como mean) toman n inputs y devuelven  1 valor
+- Una función de ventana toma n inputs y devuelve  n valores, como 
+    - Funciones de ordenado o de ranking (como `min_rank`) 
+    - Funciones de "Offset"(`lead` y `lag`), o agregados acumulativos (como `cummean` o `cumsum`)
+
+Veamos más ejemplos de funciones de ventana
+
+Presupesto (budget) acumulado por año ordenando de menor a mayor presupuesto 
+
+```{r}
+imdb %>% filter(title_year>2014) %>% group_by(title_year) %>% 
+  arrange(budget) %>% 
+  mutate(cum_budget=cumsum(budget)) %>%
+  select(title_year,movie_title,budget,cum_budget) %>%
+  arrange(title_year,budget)
+```
+
+
+Media de "Likes"" en facebook de las películas por año y diferencia con el año anterior
+
+```{r}
+imdb %>% filter(title_year>=2010) %>% group_by(title_year) %>%
+  summarise(num=n(),likes=mean(movie_facebook_likes)) %>%
+  arrange(title_year) %>%
+  mutate(change_likes=likes-lag(likes,1))
+
+```
+
+
+## Do
+
+
+Con la función `do` podemos aplicar cualquier función a los datos sin tener que limitarnos al mutate, summarise, etc.
+
+Además podemos combinar el `do` con el resto de verbos del paquete dplyr: filter, mutate, group_by, etc. La única condición es que `do` debe devolver un data frame.
+
+Dentro del código en el interior del `do`, los valores del data frame sobre el que actúan se referencian mediante "."
+
+Ilustremos su uso mediante un ejemplo. Vamos a ver cuales son los géneros mejor puntuados. Los géneros tienen un número variable para cada película. Por ejemplo Star Wars tiene "Action|Adventure|Fantasy|Sci-Fi" mientras que Titanic tiene "Drama|Romance"
+
+
+```{r,cache=TRUE,warning=FALSE}
+# Multiplico cada fila (cada película) por el número de géneros que posea
+tmp<- imdb %>%    
+  group_by(title_year,movie_title) %>% do({
+  # tomo el vector 
+  generos = as.character(.$genres)
+  # | es un caracter especial y debo "escaparlo con \\"
+  spl = strsplit(generos,split="\\|")
+  #strsplit devuelve una lista. Como deberia tener un único elemento, lo convierto a vector
+  spl=spl[[1]]
+  aux=.
+  merge(aux,data.frame(genre=spl),by=NULL)
+})
+
+# Veamos el resultado
+
+tmp %>% select(title_year,movie_title,genres,genre) %>% head(10)
+
+## Calculemos las puntuaciones medias por género
+
+tmp %>% group_by(genre) %>% summarise(num=n(),imdb_score=mean(imdb_score)) %>% arrange(-imdb_score)
+
+```
+
+
+# Gráficos en R
+
+Una de las mayores virtudes de R es su potencia para realizar gráficos y visualizaciones de gran calidad, tanto desde el paquete base como desde paquetes específicos como `lattice` o `ggplot2`. 
+
+El objetivo de esta sección no es hacer una explicación exhaustiva del sistema gráfico de R, sino a partir un conjunto muy amplio de ejemplos explorar una gran parte de su potencial y aprender de forma práctica el uso de los comandos principales. 
+
+Para la documentación precisa, te aconsejamos que consultes la ayuda en línea de R y consultes las referencias que te recomendamos.
+
+Los ejemplos los vamos a construir a partir de un conjunto de datos que contiene datos de demanda eléctrica media diaria en España, junto con algunas variables meteorológicas. 
+
+```{r}
+demanda = read.csv("../Datasets/demanda_diaria.csv",sep=";",
+                     colClasses = c("Date",rep(NA,6)))
+
+#retoques
+demanda$wd = factor(weekdays(demanda$fecha),levels=c("lunes","martes","miércoles","jueves","viernes","sábado","domingo" ))
+demanda$mes = factor(format(demanda$fecha,"%Y-%m"))
+demanda$lluvia = factor(demanda$lluvia,levels = c("Baja","Media","Alta"))
+
+head(demanda)
+```
+
+La descripción de las columnas es la siguiente: 
+
+- *Fecha*
+- *temperatura_mean:* temperatura media diaria en España. Promedio de 8 estaciones meteorológicas
+- *temperatura_min*: temperatura mínima diaria
+- *temperatura_max*: temperatura máxima diaria
+- *radiation_mean*: radiación solar media recibida
+- *demanda_mwh*: demanda eléctrica Media (Mw)
+- *lluvia*: variable categórica indicando la cantidad de lluvia diaria caída en España: Baja, Media, Alta 
+- *wd*: día de la semana
+- *mes*: mes del año
+
+## Gráficos base
+
+Para una introducción más detallada al sistema de gráficos base te remitimos a la documentación oficial que encontrarás en  <https://cran.r-project.org/doc/manuals/r-release/R-intro.html#Graphics>
+
+Puedes hacerte una primera idea de la variedad de gráficos que permite escribiendo el comando 
+`demo(graphics)` en la consola de R.
+
+### Función  plot
+
+`plot` es la función básica del sistema gráfico. Se trata de una función genérica que realiza diferentes gráficos en función de como son los datos de entrada. 
+
+Admite como entrada gran variedad de datos diferentes: vectores, modelos lineales, densidades de frecuencia estimadas, etc. Veamos mediante ejemplos los diferentes tipos de gráficos que realiza en función de la naturaleza de los datos de entrada
+
+### 1 variable numérica
+
+El argumento es un vector numérico
+
+```{r}
+plot(demanda$temperatura_mean)
+```
+
+### 1 variable categórica
+
+El argumento es un vector categórico (factor). Muestra un diagrama de frecuencias
+
+```{r}
+plot(demanda$lluvia)
+```
+
+### 2 variables numéricas
+
+Los  argumentos son dos vectores numéricos. Muestra un gráfico de dispersión
+
+```{r}
+plot(demanda$temperatura_mean,demanda$demanda)
+```
+
+## 2 variables categóricas
+
+Los  argumentos son dos vectores categóricos. Muestra una tabla de contingencias o diagrama de frecuencia bidimensional
+
+```{r}
+demanda$demcat <- cut(demanda$demanda,c(20000,25000,27500,30000,35000),labels = c("Baja","Media","Alta","Muy Alta"))
+plot(demanda$mes,demanda$demcat)
+```
+
+
+### Histogramas
+
+Para dibujar un histograma en R
+
+```{r}
+hist(demanda$demanda)
+```
+
+Un histograma es el equivalente a una tabla de frecuencias para una variable continua. Primero se divide el rango de valores de la variable en intervalos (bins), normalmente de anchura fija, y cuenta el número de ocurrencias de la variable en cada intervalo
+
+Podemos especificar de forma explícita el número de intervalos a usar. En caso contrario R elige automáticamente la división en intervalos. 
+
+```{r}
+hist(demanda$demanda_mwh,breaks = 50)
+```
+
+### Boxplot
+
+Un gráfico estadístico que proporciona mucha información sobre la relación entre una variable continua y otra categórica es el boxplot o diagrama de cajas
+
+```{r}
+boxplot(demanda$demanda_mwh ~ demanda$wd)
+```
+
+Dibuja, para una variable continua, un resumen de su distribución condicionada a una variable categórica.
+
+Muestra para cada valor de la variable categórica:
+
+- Mediana: línea central
+- Caja
+    - Cuantil 0.25
+    - Cuantil 0.75
+- Mínimo (excepto "outliers")
+- Máximo (excepto "outliers")
+- Outliers (excepcionalidades): 
+    - si $q_{0.25}-x > 1.5(q_{0.75} - q_{0.25})$
+    - o  $x- q_{0.75} > 1.5(q_{0.75} - q_{0.25})$
+
+Si no conoces o no  te acuerdas de estos conceptos estadísticos, no te preocupes que los definiremos de forma precisa  en la unidad 3 de este curso. 
+
+### Pairs
+
+Dibuja un gráfico de correlación entre múltiples variables numéricas.
+
+```{r,cache=TRUE,fig.height=5}
+pairs(demanda[c("demanda_mwh","temperatura_mean","radiation_mean","temperatura_min","temperatura_max")])
+```
+
+### Añadir elementos a un gráfico
+
+Una vez realizado el gráfico, es posible añadir diferentes elementos al gráfico, tal y como muestra el siguiente ejemplo
+
+
+```{r,fig.height=3.7}
+plot(demanda$radiation_mean,demanda$temperatura_mean,
+     ylim=c(-5,40),
+     ylab="Temperatura Media diaria",xlab="Radiación media diaria")
+# Ajuste lineal de los datos
+lmod=lm(temperatura_mean~radiation_mean,data=demanda)
+# Recta de ajuste y=a + b*x
+a=lmod$coefficients[1]; 
+b=lmod$coefficients[2]
+abline(a,b,col=2)
+# Otros puntos
+points(demanda$radiation_mean,demanda$temperatura_max,col=4,cex=0.5)
+# Anotaciones textuales
+text(150,32,"T máxima",col=4)
+# Leyenda
+legend("topleft", c("T mean","Tmax","fit"), col = c(1,4,2),
+       text.col = "grey20", lty = c(-1,-1,1), pch = c(1,1,NA),cex=0.8)
+```
+
+
+## Personalización de gráficos base
+
+Veamos dos versiones de un mismo gráfico: 
+
+La básica 
+
+```{r}
+plot(demanda$temperatura_mean,demanda$demanda_mwh)
+```
+
+y la retocada, modificando algunos  parámetros 
+
+- colores (col)
+- tamaño de puntos (cex)
+- título (main) 
+- etiquetas de ejes (xlab, ylab)
+
+```{r,fig.height=4.5}
+plot(demanda$temperatura_mean,demanda$demanda_mwh, col=demanda$wd, 
+     cex=0.5,
+     xlab="Demanda eléctrica media diaria en España (Mwh)",
+     ylab="Temperatura Media diaria",
+     main="Dependencia Demanda eléctrica y temperatura"
+     )
+```
+
+Veamos un ejemplo que modifica aún más parámetros gráficos
+
+```{r,echo=TRUE}
+x=seq(0,20,2)
+condensador=data.frame(t=x,V=10*(1-exp(-x/5)))
+plot(condensador$t,condensador$V, 
+     col="orange", # color
+     cex=1, # tamaño del punto
+     pch=4, # símbolo del punto
+     lty = 2, # tipo del línea
+     type="o", # tipo de gráfico: puntos(p), lineas(l), puntos y lineas(o) 
+     ylab="Diferencia de Potencial (V)", #titulo eje y
+     xlab="tiempo (s)", #titulo eje x
+     main="Proceso de carga de un condensador", # título principal
+     col.main = "darkgray", # color título
+     cex.axis = 0.6 # Tamaño de etiquetas ejes
+)
+```
+
+
+Los posibles **símbolos** para representar puntos son: 
+
+```{r,fig.height=4.5}
+tmp <- cbind(expand.grid(x=1:4,y=1:4),s=1:16)
+plot(tmp$x,tmp$y,pch=tmp$s,xlim=c(0,5),ylim=c(0,5))
+```
+
+
+Y los diferentes tipos de  línea
+
+```{r,fig.height=4}
+plot(x=0:1,rep(1,2),type="l",lty=1,ylim=c(0,7),xlab="",ylab="lty")
+for(i in 2:6){
+  lines(0:1,rep(i,2),lty=i)  
+}
+```
+
+### Parámetros gráficos
+
+Los parámetros gráficos se pueden cambiar de forma permanente con la función `par`.
+Una llamada a `par()` sin argumentos muestra los parámetros definidos por defecto
+
+```{r, eval=FALSE}
+par()
+```
+
+```{r, echo=FALSE}
+par() %>% head()
+```
+
+
+Puede cambiarse el valor de los parámetros pasando argumentos a la función `par` 
+
+```{r,warning=FALSE,fig.height=4.5}
+oldpar <- par()
+par(col="blue",pch=5)
+plot(rnorm(10),runif(10))
+```
+
+y también con ella podemos restaurar los parámetros originales
+
+```{r,warning=FALSE,fig.height=4.5}
+par(oldpar)
+plot(rnorm(10),runif(10))
+```
+
+### Gráficos múltiples
+
+Un parámetro muy interesante que nos permite realizar gráficos múltiples en un mismo panel es 
+`mfrow`
+
+```{r,echo=FALSE,warning=FALSE}
+oldpar<- par(mfrow=c(2,2))
+plot(demanda$fecha,demanda$demanda_mwh,type="l")
+plot(demanda$temperatura_max,demanda$demanda_mwh)
+hist(demanda$demanda_mwh,main="")
+boxplot(demanda$demanda_mwh ~ demanda$lluvia)
+par(oldpar)
+```
+
+
+## Exportar un gráfico
+
+Por supuesto, es posible exportar los gráficos realizados en R a un fichero. Veamos dos ejemplos
+
+En png
+
+```{r,eval=FALSE}
+png("figura_ejemplo.png")
+boxplot(demanda$demanda_mwh ~ demanda$mes)
+dev.off()
+```
+
+o en pdf
+
+```{r,eval=FALSE}
+pdf("figura_ejemplo.pdf")
+boxplot(demanda$demanda_mwh ~ demanda$mes)
+dev.off()
+```
+
+
+# Gráficos con ggplot2
+
+El paquete ggplot2, creado por Hadley Wickham, es una alternativa muy popular a los gráficos base. 
+Es una implementación de las ideas del libro **The Grammar of Graphics** (Leland Wilkison), cuyo objetivo es establecer una serie de principios comunes para la visualización de datos.
+
+La filosofía de aprendizaje que emplearemos es la misma que hemos usado con los gráficos base: ir descubriendo la filosofía y la sintaxis del paquete a partir de ejemplos. Para una referencia más rigurosa te remitimos a las siguientes referencias:
+
+- <http://docs.ggplot2.org/current/>
+- <http://ggplot2.org/>
+- Libro: ["ggplot2: Elegant Graphics for Data Analysis"](http://amzn.com/0387981403?tag=ggplot2-20)
+
+
+## Instalación
+
+Lo primero de todo es instalar el paquete si no lo tenemos todavía instalado. 
+
+```{r,eval=FALSE}
+install.packages("ggplot2")
+```
+
+Después cargamos el paquete
+
+```{r}
+library(ggplot2)
+```
+
+El paquete `ggplot2` dispone de una función genérica análoga al `plot` de la distribución base 
+llamada `qplot`
+
+```{r, message=FALSE,warning=FALSE,fig.height=5}
+qplot(temperatura_mean, demanda_mwh, data = demanda, color = wd )
+```
+
+Sin embargo no la vamos a usar, sino que vamos a aprender a construir los gráficos de ggplot desde la base. 
+
+## Conceptos básicos 
+
+Siempre se empieza con una llamada a `ggplot`
+
+```{r}
+p <- ggplot(demanda) 
+```
+o
+```{r}
+p <- ggplot(demanda,aes(temperatura_mean, demanda_mwh)) 
+```
+
+
+- El resultado es un objeto de la clase ggplot  
+- De momento no hay plot (gráfico), por dos razones
+      - El gráfico no se dibuja hasta que se imprime el objeto `p`
+      - El gráfico contiene 0 capas(layers)
+
+
+## Capas (layers) y estéticas (aesthetics)
+
+- Se añaden cosas al gráfico mediante el operador +
+- Se puede hacer de forma repetida añadiendo múltiples capas al gráfico
+- La función `aes` ("aesthetics") se usa para hacer corresponder las variables de los datos a atributos gráficos. 
+- El primer argumento, o los dos primeros, de `aes` especifican las variables que vamos a representar, según sea la dimensión del gráfico: 1d (un histograma por ejemplo) o 2d (un gráfico de dispersión).
+- Los siguientes argumentos son pares nombre/valor donde se especifican  otros atributos como la variable que controla el color de los puntos o la forma de los puntos, etc.
+
+Veamos un ejemplo
+
+```{r,message=FALSE,warning=FALSE,fig.height=4.5}
+p <- ggplot(demanda,aes(temperatura_mean, demanda_mwh)) +
+  geom_point() + 
+  geom_smooth()
+p
+```
+
+- Mediante `ggplot(demanda,aes(temperatura_mean, demanda_mwh))` decimos que vamos a usar los datos contenidos en el data frame demanda. Como variable `x` usaremos la columna `temperatura_mean` y como variable `y` la columna `demanda_mwh`.
+
+- Con `geom_point`: Insertamos una capa (layer) con un gráfico de dispersión de la variable `x` (*temperatura_mean*) frente la variable `y` (*demanda_mwh*).
+
+- Con `geom_smooth`: Insertamos una capa (layer) con un gráfico que muestra el ajuste a una curva suave de la variable  `y` (*demanda_mwh*) frente a la variable `x` (*temperatura_mean*).
+
+### Estéticas
+
+Se pueden establecer atributos a varios niveles:
+
+- Podemos establecer atributos para todo el gráfico llamando a `aes` dentro de `ggplot()`
+- O podemos establecer los atributos específicos para cada una de las capas
+
+Veamos ejemplos:
+
+
+```{r,message=FALSE,warning=FALSE,fig.height=4.5}
+p <- ggplot(demanda,aes(temperatura_mean, demanda_mwh)) +
+  geom_point(aes(color=wd)) + 
+  geom_smooth()
+p
+```
+
+
+```{r,message=FALSE,warning=FALSE,fig.height=4.5}
+p <- ggplot(demanda,aes(temperatura_mean, demanda_mwh)) +
+  geom_point(aes(color=wd),size=1,alpha=0.5) + 
+  geom_smooth(aes(color=wd),se=FALSE)
+p
+```
+
+
+Los aesthetics pueden variar en  cada capa individual 
+
+```{r,message=FALSE,warning=FALSE,fig.height=4.5}
+ggplot(demanda) +
+  geom_line(aes(fecha,temperatura_min),color="blue") + 
+  geom_line(aes(fecha,temperatura_mean),color="grey") +
+  geom_line(aes(fecha,temperatura_max),color="red")   
+```
+
+### Capas
+
+Hay varios tipos de objetos que se pueden añadir a los gráficos:
+
+- **geoms** (“geometrics”): los gráficos que queremos mostrar, puntos, líneas, barras, polígonos, texto, etc
+- **position**: ajustes de posición. Por ejemplo en un gráfico de barras controla donde deben situarse las barras, si una al lado de otra o apiladas. 
+- **facets**: pueden dibujarse varios paneles en un mismo gráfico que dividen los datos según el valor de ciertas variables categóricas
+- **scales**: controlan las características de escala de las variables. Por ejemplo una escala logarítmica para una variable continua o para escoger la paleta de colores para una variable categórica. 
+- **themes**: ¿No te gusta el fondo gris? ¿Quieres personalizar el etiquetado? Pueden definirse estas características de forma individual o usar temas predefinidos.
+
+
+## Ejemplos de gráficos 
+
+Veamos ahora una galería de los diferentes tipos de gráficos que podemos elaborar combinando diferentes capas. 
+
+**Autotexto video**
+
+Para mayores explicaciones de los diferentes gráficos tenéis a disposición un vídeo en campus donde se explican uno a uno. 
+
+**Fin  Autotexto video**
+
+
+### Gráfico de puntos
+
+```{r,message=FALSE,warning=FALSE,fig.height=4.5}
+ggplot(demanda) + 
+  geom_point(aes(radiation_mean,demanda_mwh, color=wd)) 
+```
+
+
+### Gráfico de puntos y líneas
+
+```{r,message=FALSE,warning=FALSE,fig.height=4.5}
+library(dplyr)
+ggplot(demanda %>% filter(mes=="2014-01")) + 
+  geom_point(aes(fecha,demanda_mwh)) + 
+  geom_line(aes(fecha,demanda_mwh))
+```
+
+### Ajuste suave
+
+```{r,message=FALSE,warning=FALSE,fig.height=4.5}
+ggplot(demanda %>% filter(mes=="2014-01"),aes(fecha,demanda_mwh)) + 
+  geom_point() + 
+  geom_line() + 
+  geom_smooth()
+```
+
+### Ajuste lineal
+
+```{r,message=FALSE,warning=FALSE,fig.height=4.5}
+ggplot(demanda %>% filter(mes=="2014-01"),aes(fecha,demanda_mwh)) + 
+  geom_point() + 
+  geom_line() + 
+  geom_smooth(method="lm")
+```
+
+### Histogramas - stack
+
+```{r,message=FALSE,warning=FALSE,fig.height=4.5}
+# Ojo: Cambio los datos de wide a long para el plot
+library(reshape2)
+tmp <- melt(demanda,id.vars ="fecha", 
+            measure.vars =c("temperatura_min","temperatura_max"))
+ggplot(tmp) + geom_histogram(aes(value,fill=variable))
+```
+
+### Histogramas - dodge
+
+```{r,message=FALSE,warning=FALSE,fig.height=4.5}
+
+ggplot(tmp) + geom_histogram(aes(value,fill=variable),
+                             binwidth = 5, position = "dodge")
+```
+
+### Histogramas - identity
+
+```{r,message=FALSE,warning=FALSE,fig.height=4.5}
+
+ggplot(tmp) + geom_histogram(aes(value,fill=variable), alpha=0.5,
+                             binwidth = 5, position = "identity")
+```
+
+
+### Histogramas - facets
+
+Una funcionalidad muy interesante en ggplot son los facets. Es posible dividir un gŕafico en varios paneles en función de los valores de los datos. Para ello usamos las funciones `facet_wrap`
+y 'facet_grid`
+
+```{r,message=FALSE,warning=FALSE,fig.height=4.5}
+ggplot(tmp) + geom_histogram(aes(value,fill=variable),binwidth = 2) + 
+  facet_wrap(~variable)
+```
+
+### Histogramas - facet grid
+
+```{r,message=FALSE,warning=FALSE,fig.height=4.5}
+ggplot(demanda) + geom_histogram(aes(demanda_mwh),binwidth = 1000) + 
+  facet_grid(lluvia~wd)
+```
+
+
+### Histogramas - density
+
+```{r,message=FALSE,warning=FALSE,fig.height=4.5}
+tmp <- melt(demanda,id.vars ="fecha", 
+            measure.vars =c("temperatura_min","temperatura_max"))
+ggplot(tmp) + geom_density(aes(value,color=variable))
+```
+
+### Gráficos de barras
+
+Primero agrupamos datos
+
+```{r}
+tmp <- demanda %>% group_by(mes,wd) %>% summarise(demanda=sum(demanda_mwh))
+```
+
+### Gráficos de barras - dodge
+
+```{r,message=FALSE,warning=FALSE,fig.height=4.5}
+ggplot(tmp, aes(mes,demanda,fill=wd)) + 
+  geom_bar(position="dodge", stat="identity") + 
+  theme(axis.text.x = element_text(angle=60))
+```
+
+### Gráficos de barras - stack
+
+```{r,message=FALSE,warning=FALSE,fig.height=4}
+ggplot(tmp, aes(mes,demanda,fill=wd)) + 
+  geom_bar(position="stack", stat="identity") + 
+  theme(axis.text.x = element_text(angle=60))
+```
+
+### Gráfico de area
+
+```{r,message=FALSE,warning=FALSE,fig.height=4}
+# La variable x debe ser una variable continua
+# Debo convertir la variable mes a fecha 
+
+ggplot(tmp,aes(as.Date(paste(mes,"-01",sep="")),demanda,fill=wd)) + 
+  geom_area() + xlab("mes")
+```
+
+### Boxplot
+
+```{r,message=FALSE,warning=FALSE,fig.height=5}
+ggplot(demanda,aes(wd,demanda_mwh)) +
+    geom_boxplot()
+```
+
+### Boxplot y puntos "jitter"
+
+```{r,message=FALSE,warning=FALSE,fig.height=5}
+
+ggplot(demanda,aes(wd,demanda_mwh)) + geom_boxplot() + 
+  geom_point(position="jitter",size=1,color="blue")  
+    
+```
+
+### Boxplot variable continua
+
+```{r,message=FALSE,warning=FALSE,fig.height=5}
+
+ggplot(demanda) +
+  geom_boxplot(aes(temperatura_mean,demanda_mwh, group=cut_width(temperatura_mean,width=5))) + 
+    geom_point(aes(temperatura_mean,demanda_mwh),size=1,alpha=0.7,color="orange") 
+    
+```
+
+### Cambio de datos 
+
+Vemos una forma sencilla de cambiar los datos sobre los cuales se realiza el gráfico
+
+```{r,message=FALSE,warning=FALSE,fig.height=5}
+p<- ggplot(demanda) + 
+  geom_point(aes(temperatura_max,demanda_mwh,color=radiation_mean))
+p
+```
+
+
+Restrinjo los datos al fin de semana
+
+```{r,message=FALSE,warning=FALSE,fig.height=4.5}
+p %+% subset(demanda,wd %in% c("sábado","domingo"))
+```
+
+
+## Personalización de gráficos
+
+Veamos por último algunas formas de personalizar nuestros gráficos de ggplot. En la unidad 4 del curso profundizaremos más en este aspecto. 
+
+### Etiquetas de ejes
+
+```{r,message=FALSE,warning=FALSE,fig.height=4}
+  p <- ggplot(demanda) + 
+  geom_point(aes(temperatura_max,demanda_mwh,color=radiation_mean)) +
+  xlab("Wind Speed M1") + ylab("Wind Speed M2")  
+  p
+```
+
+
+### Escalas de ejes
+
+```{r,message=FALSE,warning=FALSE,fig.height=4.5}
+  p +
+  scale_y_continuous(breaks=seq(20000,35000,1000))
+```
+
+
+### Escalas de color
+
+```{r,message=FALSE,warning=FALSE,fig.height=5}
+  p + scale_color_continuous("Temperatura", low="yellow",high = "red")
+```
+
+
+### Parámetros generales
+
+Detalles generales del gráfico se controlan con `theme`
+
+```{r, message=FALSE,warning=FALSE,fig.height=4.5}
+p + 
+  theme_bw() + 
+  theme(legend.position ="bottom", axis.text.x=element_text(angle=90, color="red")) 
+
+```
+
+## Exportar gráficos
+
+Podemos exportar los gráficos de ggplot mediante el método que usamos para los gráficos base
+
+```{r,eval=FALSE}
+p<- ggplot(mtcars)  + geom_point(aes(mpg,wt,color=factor(gear)))
+png("grafico.png")
+p
+dev.off()
+```
+
+
+O mediante la función `ggsave`
+
+```{r,eval=FALSE}
+ggsave("grafico.pdf",p)
+```
+
+Si se ejecuta sin el segundo argumento, guarda el último gráfico realizado
+
+```{r,eval=FALSE}
+ggsave("grafico.pdf")
+```
+
+
+# ¿Qué has aprendido?
+
+Con lo visto hasta ahora, ya puedes empezar a hacer tus propios programas en R y empezar a transformar los datos en conocimiento. Aunque al principio te esté resultando difícil, no retrocedas en tu empeño y ya verás como en poco tiempo R se convertirá en un aliado muy útil a la hora de trabajar con datos.
+
+**Puede ponerse como reto**
+
+Te proponemos que pienses algún ejemplo de análisis de datos que hayas pensado hacer alguna vez usando una hoja de cálculo y expongas qué ventajas encuentras en utilizar R como herramienta de trabajo. 
+
+En los ejemplos y ejercicios de la unidad hemos visto algunos ejemplos:
+
+- Analizar y entender la factura de la luz.
+- Analizar resultados de competiciones deportivas e idear métodos para apostar.
+- Analizar estrategias en juegos de azar.
+- Encontrar películas o libros que nos puedan gustar a partir de la opinión de otras personas.
+
+# Autoevaluación
+
+1. ¿Cuántos paquetes de R hay registrados en CRAN en febrero de 2017?
+    a. Menos de 1000
+    b. Entre 1000 y5000
+    c. Entre 5000 y 8000
+    d. Alrededor de 10000
+
+
+2. Ejecuta en R el siguiente comando: log(sqrt(6^3 - 15^2 +9)). ¿Cuál es el resultado? 
+    a. NA
+    b. Nan
+    c. -Inf
+    d. 3.123053
+
+3. ¿Cuál de los siguientes no es un posible tipo de vector atómico en R?
+    a. numeric
+    b. integer
+    c. string
+    d. character
+
+4. Ejecuta el siguiente comando en R 
+  
+         set.seed(123)
+         x<-rnorm(10,mean=0,sd=5)
+
+    ¿Cuánto vale la suma de los valores de x menores de 0? 
+
+    a. -11.90
+    b. 19.67
+    c. -15.94 
+    d. -19.67
+
+5.  Para leer un fichero llamado myfile.csv cuyas primeras líneas son
+
+        empleado;edad;puesto;salario
+        P. Martinez;34;Admistrativo;18000
+        C. Cuesta;22;Comercial;21000
+    
+    ¿Cuál es el comando más apropiado?
+    
+    a. read.table("myfile.csv")
+    b. read.csv("myfile.csv")
+    c. read.table("myfile.csv",header=FALSE, dec=",")
+    d. read.table("myfile.csv",header=TRUE, sep=";")
+
+
+6. Para convertir una tabla de datos de formato wide a formato long usaremos la función:
+
+    a. melt
+    b. cast
+    c. dcast
+    d. vapply
+
+7. ¿Cuál de las siguientes funciones no es un verbo principal del paquete dplyr?
+
+    a. summarise
+    b. filter
+    c. mutate
+    d. transform
+
+8. ¿Cuál de los siguientes comandos generaría un error? (Puedes probarlos en R y no te olvides de cargar el paquete dplyr con library(dplyr))
+
+    a. iris %>% group_by(Species) %>% summarise(res=mean(Sepal.Length))
+    b. iris %>% group_by(Species) %>% summarise(res=median(Sepal.Length))
+    c. iris %>% group_by(Species) %>% summarise(res=quantile(Sepal.Length,0.3))
+    d. iris %>% group_by(Species) %>% summarise(res=quantile(Sepal.Length,c(0.25,.75)))
+
+
+9. ¿Qué tipo de gráfico devolverá el comando plot(iris\$Species,iris\$Sepal.Length) ?
+
+    a. Gráfico de dispersión
+    b. Boxplot
+    c. Gráfico de barras
+    d. Histograma
+
+10. Ejecuta el siguiente gráfico sobre el conjunto de datos diamonds
+
+        ggplot(data=diamonds) + geom_histogram(breaks=seq(0,5000,500), aes(x=diamonds$price))  + xlab("Precio Diamantes U$ - Binwidth 500") + ylab("Frequency") + xlim(0,5000)
+
+    ¿Cuál es el tramo de precio con más ocurrencias?
+
+    a. 0-500
+    b. 500-1000
+    c. 2000-2500
+    d. 4500-5000
+
+
+# Solucionario
+
+1-d;2-c;3-c;4-c;5-d;6-a;7-d;8-d;9-b;10-b
+
+# Bibliografía 
+
+## Manuales generales de R
+
+- Introducction to R: <https://cran.r-project.org/doc/manuals/r-release/R-intro.html>.
+En Español (<https://cran.r-project.org/doc/contrib/R-intro-1.1.0-espanol.1.pdf>)
+- R para Principiantes, Emmanuel Paradis  <http://cran.r-project.org/doc/contrib/rdebuts_es.pdf> 
+- R Programming for Data Science, Roger D. Peng <small>  <http://leanpub.com/rprogramming> 
+- icebreakeR: <small> <http://www.ms.unimelb.edu.au/~andrewpr/r-users/icebreakeR.pdf>
+- Introduction to Probability and Statistics Using R, G. Jay Kerns. Se obtiene en formato pdf descargando el paquete "IPSUR" desde R.
+- R for Data Science, Garrett Grolemund, Hadley Wickham <http://r4ds.had.co.nz/>
+
+## Paquete dplyr
+
+- <https://github.com/hadley/dplyr>
+- <https://github.com/hadley/dplyr/blob/master/vignettes/>
+- <http://genomicsclass.github.io/book/pages/dplyr_tutorial.html>
+- Manipulación de datos con dplyr <https://www.gitbook.com/book/rsanchezs/dplyr>
+
+
+## Gráficos en R
+
+- Capítulo 12 Introducction to R: <https://cran.r-project.org/doc/manuals/r-release/R-intro.html#Graphics>
+- <http://docs.ggplot2.org/current/>
+- <http://ggplot2.org/>
+- ggplot2: Elegant Graphics for Data Analysis, Hadley Wickham
+
+
+## Otros créditos
+
+Los datos de resultados de fútbol proceden de <http://football-data.co.uk>
+
+Los datos de valoración de películas proceden de la plataforma Kaggle <https://www.kaggle.com/datasets>
+
+Los datos de demanda eléctrica han sido eleborados a partir de información procedente de Esios (Red Eléctrica de España) <https://www.esios.ree.es>
+y datos meteorológicos de Weather Underground <https://www.wunderground.com/>
+
+La gráfica de evolución del número de paquetes de R se ha realizado con un código inspirado en <http://blog.revolutionanalytics.com/2016/04/cran-package-growth.html>
+
+

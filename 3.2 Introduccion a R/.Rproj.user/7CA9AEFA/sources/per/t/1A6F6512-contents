@@ -1,0 +1,1365 @@
+---
+title: "Graficos en R"
+subtitle: "Curso Superior en Ciencia de Datos y Big Data"
+author: "MasterD"
+output: 
+  revealjs::revealjs_presentation:
+    css: www/style.css
+    theme: sky
+    highlight: pygments 
+    center: true
+---
+  
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, error = FALSE)
+options(width=100)
+wdir= getwd()
+```
+
+# Datos ejemplos
+
+## Demanda eléctrica
+
+```{r}
+demanda = read.csv("C:/Users/alber/Documents/Formacion informatica/Master/R/Projects/Curso big data/3.2 Introduccion a R/Data/demanda_diaria.csv",sep=";",
+                     colClasses = c("Date",rep(NA,6)))
+#retoques
+demanda$wd = factor(weekdays(demanda$fecha),levels=c("lunes","martes","miércoles","jueves","viernes","sábado","domingo"))
+demanda$mes = factor(format(demanda$fecha,"%Y-%m"))
+demanda$lluvia = factor(demanda$lluvia,levels = c("Baja","Media","Alta"))
+head(demanda)
+```
+
+# Graficos base
+
+##  plot
+Función plot()
+
+- Función genérica
+- Datos de entrada diferentes  ->  Gráficos diferentes 
+- Admite como entrada vectores, modelos lineales, densidades estimadas, etc.
+
+## 1 x numeric
+
+```{r}
+plot(demanda$temperatura_mean)
+```
+
+## 1 x Categorical
+
+```{r}
+plot(demanda$lluvia)
+```
+
+## 2 x Numeric
+
+```{r}
+plot(demanda$temperatura_mean,demanda$demanda)
+```
+
+## 2x Categorical
+
+```{r}
+demanda$demcat <- cut(demanda$demanda,c(20000,25000,27500,30000,35000),labels = c("Baja","Media","Alta","Muy Alta"))
+plot(demanda$mes,demanda$demcat)
+```
+```{r}
+plot(demanda$lluvia,demanda$demcat)
+```
+
+
+
+## Histogramas - hist()
+
+```{r}
+hist(demanda$demanda)
+```
+
+## hist()
+
+```{r}
+hist(demanda$demanda_mwh,breaks = 50)
+```
+
+## density{#smaller}
+La función *density* hace un ajuste, por el método kernel, de la densidad de frecuencia
+
+```{r,fig.height=5}
+hist(demanda$demanda_mwh,breaks = 50, probability = TRUE)
+lines(density(demanda$demanda_mwh,na.rm=TRUE))
+```
+
+## Boxplot
+
+```{r}
+boxplot(demanda$demanda_mwh ~ demanda$wd)
+```
+
+## Boxplot
+
+Dibuja, para una variable continua, un resumen de su distribución condicionada a una variable categórica.
+
+Muestra para cada valor de la variable categórica:
+
+- Mediana: linea central
+- Caja
+    - Cuantil 0.25
+    - Cuantil 0.75
+- Mínimo (excepto "outliers")
+- Máximo (excepto "outliers")
+- Outliers (excepcionalidades): 
+    - si $q_{0.25}-x > 1.5(q_{0.75} - q_{0.25})$
+    - o  $x- q_{0.75} > 1.5(q_{0.75} - q_{0.25})$
+
+## Pairs
+<center>
+```{r,cache=TRUE,fig.height=5}
+pairs(demanda[c("demanda_mwh","temperatura_mean","radiation_mean","temperatura_min","temperatura_max")])
+```
+</center>
+
+## Añadir elementos a un gráfico
+
+<center>
+
+```{r, eval=FALSE, echo=TRUE}
+plot(demanda$radiation_mean,demanda$temperatura_mean,
+     ylim=c(-5,40),
+     ylab="Temperatura Media diaria",xlab="Radiación media diaria")
+# Ajuste lineal de los datos
+lmod=lm(temperatura_mean~radiation_mean,data=demanda)
+# Recta de ajuste y=a + b*x
+a=lmod$coefficients[1]; b=lmod$coefficients[2]
+abline(a,b,col=2)
+# Otros puntos
+points(demanda$radiation_mean,demanda$temperatura_max,col=4,cex=0.5)
+# Anotaciones textuales y leyenda
+text(150,32,"T máxima",col=4)
+legend("topleft", c("T mean","Tmax","fit"), col = c(1,4,2),
+       text.col = "grey20", lty = c(-1,-1,1), pch = c(1,1,NA),cex=0.8)
+```
+</center>
+
+## Añadir elementos a un gráfico
+
+<center>
+
+```{r,fig.height=3.7, echo=FALSE}
+plot(demanda$radiation_mean,demanda$temperatura_mean,
+     ylim=c(-5,40),
+     ylab="Temperatura Media diaria",xlab="Radiación media diaria")
+# Ajuste lineal de los datos
+lmod=lm(temperatura_mean~radiation_mean,data=demanda)
+# Recta de ajuste y=a + b*x
+a=lmod$coefficients[1]; b=lmod$coefficients[2]
+abline(a,b,col=2)
+# Otros puntos
+points(demanda$radiation_mean,demanda$temperatura_max,col=4,cex=0.5)
+# Anotaciones textuales y leyenda
+text(150,32,"T máxima",col=4)
+legend("topleft", c("T mean","Tmax","fit"), col = c(1,4,2),
+       text.col = "grey20", lty = c(-1,-1,1), pch = c(1,1,NA),cex=0.8)
+```
+
+</center>
+
+
+
+# Personalización de gráficos base
+
+## Basic plot
+<center>
+
+```{r}
+plot(demanda$temperatura_mean,demanda$demanda_mwh)
+```
+</center>
+
+## Fancy plot 
+<center>
+
+```{r,fig.height=4.5}
+plot(demanda$temperatura_mean,demanda$demanda_mwh, col=demanda$wd, 
+     cex=0.5,
+     xlab="Demanda eléctrica media diaria en España (Mwh)",
+     ylab="Temperatura Media diaria",
+     main="Dependencia Demanda eléctrica y temperatura"
+     )
+```
+</center>
+
+
+## Más parámetros gráficos
+<center>
+
+
+```{r,eval=FALSE}
+x=seq(0,20,2)
+condensador=data.frame(t=x,V=10*(1-exp(-x/5)))
+plot(condensador$t,condensador$V, 
+     col="orange", # color
+     cex=1, # tamaño del punto
+     pch=4, # símbolo del punto
+     lty = 2, # tipo del linea
+     type="o", # tipo de gráfico: puntos(p), lineas(l), puntos y lineas(o) 
+     ylab="Diferencia de Potencial (V)", #titulo eje y
+     xlab="tiempo (s)", #titulo eje x
+     main="Proceso de carga de un condensador", # título principal
+     col.main = "darkgray", # color título
+     cex.axis = 0.6 # Tamaño de etiquetas ejes
+)
+```
+</center>
+
+##
+
+```{r,echo=FALSE}
+x=seq(0,20,2)
+condensador=data.frame(t=x,V=10*(1-exp(-x/5)))
+plot(condensador$t,condensador$V, 
+     col="orange", # color
+     cex=1, # tamaño del punto
+     pch=4, # símbolo del punto
+     lty = 2, # tipo del linea
+     type="o", # tipo de gráfico: puntos(p), lineas(l), puntos y lineas(o) 
+     ylab="Diferencia de Potencial (V)", #titulo eje y
+     xlab="tiempo (s)", #titulo eje x
+     main="Proceso de carga de un condensador", # título principal
+     col.main = "darkgray", # color título
+     cex.axis = 0.6 # Tamaño de etiquetas ejes
+)
+```
+
+## Simbolos
+<center>
+
+```{r,fig.height=4.5}
+tmp <- cbind(expand.grid(x=1:4,y=1:4),s=1:16)
+plot(tmp$x,tmp$y,pch=tmp$s,xlim=c(0,5),ylim=c(0,5))
+```
+</center>
+
+## Tipos de linea
+<center>
+
+```{r,fig.height=4}
+plot(x=0:1,rep(1,2),type="l",lty=1,ylim=c(0,7),xlab="",ylab="lty")
+for(i in 2:6){
+  lines(0:1,rep(i,2),lty=i)  
+}
+```
+</center>
+
+## Parámetros gráficos
+
+Los parámetros gráficos se pueden cambiar de forma permanente con la función par()
+Una llamada a par() sin argumentos muestra los parámetros definidos
+```{r}
+par()
+```
+
+## par()
+
+Pueden cambiarse parámetros con 
+
+```{r,warning=FALSE,fig.height=4.5}
+oldpar <- par()
+par(col="blue",pch=5)
+plot(rnorm(10),runif(10))
+```
+
+
+## Vuelta a los parámetros originales
+
+```{r,warning=FALSE,fig.height=4.5}
+par(oldpar)
+plot(rnorm(10),runif(10))
+```
+
+## Gráficos múltiples
+
+```{r,eval=FALSE}
+oldpar<- par(mfrow=c(2,2))
+plot(demanda$fecha,demanda$demanda_mwh,type="l")
+plot(demanda$temperatura_max,demanda$demanda_mwh)
+hist(demanda$demanda_mwh,main="")
+boxplot(demanda$demanda_mwh ~ demanda$lluvia)
+par(oldpar)
+```
+
+##
+
+```{r,echo=FALSE,warning=FALSE}
+oldpar<- par(mfrow=c(2,2))
+plot(demanda$fecha,demanda$demanda_mwh,type="l")
+plot(demanda$temperatura_max,demanda$demanda_mwh)
+hist(demanda$demanda_mwh,main="")
+boxplot(demanda$demanda_mwh ~ demanda$lluvia)
+par(oldpar)
+```
+
+## Exportar un gráfico
+
+En png
+
+```{r,eval=FALSE}
+png("figura_ejemplo.png")
+boxplot(demanda$demanda_mwh ~ demanda$mes)
+dev.off()
+```
+
+o en pdf
+
+```{r,eval=FALSE}
+pdf("figura_ejemplo.png")
+boxplot(demanda$demanda_mwh ~ demanda$mes)
+dev.off()
+```
+
+
+##  Más información
+
+<https://cran.r-project.org/doc/manuals/r-release/R-intro.html#Graphics>
+
+
+# Gráficos con ggplot2
+
+## Introducción
+
+El paquete ggplot2, de Hadley Wickham, es una alternativa muy popular a los gráficos base. 
+Es una implementación de las ideas del libro **The Grammar of Graphics** (Leland Wilkison), cuyo objetivo es establecer una serie de principios comunes para la visualización de datos.
+
+Mas información en:
+
+- <http://docs.ggplot2.org/current/>
+- <http://ggplot2.org/>
+- Libro: ["ggplot2: Elegant Graphics for Data Analysis"](http://amzn.com/0387981403?tag=ggplot2-20)
+
+## Instalación
+
+```{r,eval=FALSE}
+if(!require(ggplot2))
+  install.packages("ggplot2")
+```
+```{r}
+library(ggplot2)
+```
+
+## Gráficos con qplot
+
+```{r, message=FALSE,warning=FALSE,fig.height=5}
+qplot(temperatura_mean, demanda_mwh, data = demanda, color = wd )
+```
+
+## Conceptos básicos 
+
+Siempre se empieza con una llamada a ggplot
+
+```{r}
+p <- ggplot(demanda) 
+```
+o
+```{r}
+p <- ggplot(demanda,aes(temperatura_mean, demanda_mwh)) 
+```
+
+<left>
+
+- El resultado es un objeto de la clase ggplot  
+- De momento no hay plot, por dos razones
+    - El gráfico no se dibuja hasta que se imprime el objeto **p**
+    - El gŕafico contiene 0 capas (layers)
+
+</left>
+
+## Layers y aesthetics
+
+- Se añaden cosas al gráfico mediante el operador +
+- Se puede hacer de forma repetida añadiendo multiples capas al gráfico
+- La función **aes()** ("aesthetics") se usa para hacer corresponder las variables de los datos a atributos gráficos. 
+- El primer argumento, o los dos primeros, de aes() especifican las variables que vamos a representar, segun sea la dimensión del gráfico: 1d (un histograma por ejemplo) o 2d (un gráfico de dispersión).
+- Los siguientes argumentos son pares nombre/valor donde se especifican  otros atributos como la variable que controla el color de los puntos o la forma de los puntos, etc.
+
+## Ejemplo
+
+```{r,message=FALSE,warning=FALSE,fig.height=4.5}
+p <- ggplot(demanda,aes(temperatura_mean, demanda_mwh)) +
+  geom_point() + 
+  geom_smooth()
+p
+```
+
+## Aesthetics
+
+Se pueden establecer atributos a varios niveles:
+
+- Podemos establecer atributos para todo el gráfico llamando a aes() dentro de ggplot()
+- O podemos establecer los atributos especificos para cada una de las capas
+
+## Ejemplo
+
+```{r,message=FALSE,warning=FALSE,fig.height=4.5}
+p <- ggplot(demanda,aes(temperatura_mean, demanda_mwh)) +
+  geom_point(aes(color=wd)) + 
+  geom_smooth()
+p
+```
+
+## Ejemplo
+
+```{r,message=FALSE,warning=FALSE,fig.height=4.5}
+p <- ggplot(demanda,aes(temperatura_mean, demanda_mwh)) +
+  geom_point(aes(color=wd),size=1,alpha=0.5) + 
+  geom_smooth(aes(color=wd),se=FALSE)
+p
+```
+
+
+
+## aes()
+Los aesthetics pueden especificarse en la llamada en a ggplot o en cada capa individual 
+
+```{r,message=FALSE,warning=FALSE,fig.height=4.5}
+ggplot(demanda) +
+  geom_line(aes(fecha,temperatura_min),color="blue") + 
+  geom_line(aes(fecha,temperatura_mean),color="grey") +
+  geom_line(aes(fecha,temperatura_max),color="red")   
+```
+
+## Capas
+
+Hay varios tipos de objetos que se pueden añadir a los gráficos:
+
+- **geoms** (“geometrics”): los gráficos que queremos mostrar, puntos, lineas, barras, polígonos, texto, etc
+- **position**: ajustes de posición. Por ejemplo en un gráfico de barras controla donde deben situarse las barras, si una al lado de otra o apiladas. 
+- **facets**: pueden dibujarse varios paneles en un mismo gráfico que dividen los datos segun el valor de ciertas variables categóricas
+- **scales**: controlan las caracteristicas de escala de las variables. Por ejemplo una escala logarítmica para una variable continua o para escoger la paleta de colores para una variable categótica. 
+- **themes**: ¿No te gusta el fondo gris? ¿Quieres personalizar el etiquetado? Pueden definirse estas características de forma individual o usar temas predefinidos.
+
+# Ejemplos ggplot2
+
+## Grafico de puntos
+
+```{r,message=FALSE,warning=FALSE,fig.height=4.5}
+ggplot(demanda) + 
+  geom_point(aes(radiation_mean,demanda_mwh, color=wd)) 
+```
+
+
+## Grafico de puntos y lineas
+
+```{r,message=FALSE,warning=FALSE,fig.height=4.5}
+library(dplyr)
+ggplot(demanda %>% filter(mes=="2014-01")) + 
+  geom_point(aes(fecha,demanda_mwh)) + 
+  geom_line(aes(fecha,demanda_mwh))
+```
+
+## Añadimos un ajuste suave
+
+```{r,message=FALSE,warning=FALSE,fig.height=4.5}
+ggplot(demanda %>% filter(mes=="2014-01"),aes(fecha,demanda_mwh)) + 
+  geom_point() + 
+  geom_line() + 
+  geom_smooth()
+```
+
+## Añadimos un ajuste lineal
+
+```{r,message=FALSE,warning=FALSE,fig.height=4.5}
+ggplot(demanda %>% filter(mes=="2014-01"),aes(fecha,demanda_mwh)) + 
+  geom_point() + 
+  geom_line() + 
+  geom_smooth(method="lm")
+```
+
+## Histogramas - stack
+
+```{r,message=FALSE,warning=FALSE,fig.height=4.5}
+# Ojo: Cambio los datos de wide a long para el plot
+library(reshape2)
+tmp <- melt(demanda,id.vars ="fecha", 
+            measure.vars =c("temperatura_min","temperatura_max"))
+ggplot(tmp) + geom_histogram(aes(value,fill=variable))
+```
+
+## Histogramas - dodge
+
+```{r,message=FALSE,warning=FALSE,fig.height=4.5}
+
+ggplot(tmp) + geom_histogram(aes(value,fill=variable),
+                             binwidth = 5, position = "dodge")
+```
+
+## Histogramas - identity
+
+```{r,message=FALSE,warning=FALSE,fig.height=4.5}
+
+ggplot(tmp) + geom_histogram(aes(value,fill=variable), alpha=0.5,
+                             binwidth = 5, position = "identity")
+```
+
+
+## Histogramas - facets
+
+```{r,message=FALSE,warning=FALSE,fig.height=4.5}
+ggplot(tmp) + geom_histogram(aes(value,fill=variable),binwidth = 2) + 
+  facet_wrap(~variable)
+```
+
+## Histogramas - facet grid
+
+```{r,message=FALSE,warning=FALSE,fig.height=4.5}
+ggplot(demanda) + geom_histogram(aes(demanda_mwh),binwidth = 1000) + 
+  facet_grid(lluvia~wd)
+```
+
+
+## Histogramas - density
+
+```{r,message=FALSE,warning=FALSE,fig.height=4.5}
+tmp <- melt(demanda,id.vars ="fecha", 
+            measure.vars =c("temperatura_min","temperatura_max"))
+ggplot(tmp) + geom_density(aes(value,color=variable))
+```
+
+## Gráficos de barras
+
+Primero agrupamos datos
+
+```{r}
+tmp <- demanda %>% group_by(mes,wd) %>% summarise(demanda=sum(demanda_mwh))
+```
+
+## Gráficos de barras - dodge
+
+```{r,message=FALSE,warning=FALSE,fig.height=4.5}
+ggplot(tmp, aes(mes,demanda,fill=wd)) + 
+  geom_bar(position="dodge", stat="identity") + 
+  theme(axis.text.x = element_text(angle=60))
+```
+
+## Gráficos de barras - stack
+
+```{r,message=FALSE,warning=FALSE,fig.height=4}
+ggplot(tmp, aes(mes,demanda,fill=wd)) + 
+  geom_bar(position="stack", stat="identity") + 
+  theme(axis.text.x = element_text(angle=60))
+```
+
+## Grafico de area
+
+```{r,message=FALSE,warning=FALSE,fig.height=4}
+# La variable x debe ser una variable continua
+# Debo convertir la variable mes a fecha 
+
+ggplot(tmp ,aes(as.Date(paste(mes,"-01",sep="")),demanda,fill=wd,group=wd)) + 
+  geom_area() + xlab("mes")
+```
+
+## Boxplot
+
+```{r,message=FALSE,warning=FALSE,fig.height=5}
+ggplot(demanda,aes(wd,demanda_mwh)) +
+    geom_boxplot()
+```
+
+## Boxplot y puntos "jitter"
+
+```{r,message=FALSE,warning=FALSE,fig.height=5}
+
+ggplot(demanda,aes(wd,demanda_mwh)) + geom_boxplot() + 
+  geom_point(position="jitter",size=1,color="blue")  
+    
+```
+
+## Boxplot variable continua
+
+```{r,message=FALSE,warning=FALSE,fig.height=5}
+
+ggplot(demanda) +
+  geom_boxplot(aes(temperatura_mean,demanda_mwh, group=cut_width(temperatura_mean,width=5))) + 
+    geom_point(aes(temperatura_mean,demanda_mwh),size=1,alpha=0.7,color="orange") 
+    
+```
+
+## Cambio de datos 
+
+```{r,message=FALSE,warning=FALSE,fig.height=5}
+p<- ggplot(demanda) + 
+  geom_point(aes(temperatura_max,demanda_mwh,color=radiation_mean))
+p
+```
+
+## Cambio de datos
+
+Restrinjo los datos al fin de semana
+
+```{r,message=FALSE,warning=FALSE,fig.height=4.5}
+p %+% subset(demanda,wd %in% c("sábado","domingo"))
+```
+
+
+## Exportar gráficos ggplot
+
+Podemos exportar los gráficos de ggplot mediante el método que usamos para los gráficos base
+
+```{r,eval=FALSE}
+p<- ggplot(mtcars)  + geom_point(aes(mpg,wt,color=factor(gear)))
+png("grafico.png")
+p
+dev.off()
+```
+
+
+## ggsave
+
+O mediante la función ggsave
+
+```{r,eval=FALSE}
+ggsave("grafico.pdf",p)
+```
+
+Si se ejecuta sin el segundo argumento, guarda el último gráfico realizado
+
+```{r,eval=FALSE}
+ggsave("grafico.pdf")
+```
+
+
+
+# Gráficos para comunicación de Resultados
+
+
+## Gráficos para comunicación
+
+- Hasta ahora hemos aprendido a hacer gráficos orientados al análisis exploratorio de datos
+
+- Pero cuando hemos llegado a  entender los datos, hemos extraído conclusiones de ellos y queremos comunicar los resultados al resto del mundo, nuestro público objetivo no tendrá el mismo conocimiento de los datos que tenemos nosotros. 
+
+- Deberemos esforzarnos en crear unos gráficos que sean fáciles de comprender por nuestra audiencia.
+
+
+- Vamos a trabajar con los datos del paquete *gapminder*: información de población, riqueza y esperanza de vida de países del mundo desde los años 50 del siglo XX. Si no lo tienes instalado
+
+```{r, eval=FALSE}
+install.packages("gapminder")
+```
+
+
+## Etiquetas
+
+El sitio más fácil para comenzar a convertir un gráfico exploratorio en un gráfico publicable es mediante un buen etiquetado. 
+
+Añade etiquetas con la función labs(). Podemos añadir:
+
+- Títulos
+- Subtítulos 
+- Captions (Explicaciones a pie de imagen)
+- Títulos de ejes y leyendas
+
+
+
+##  Títulos
+
+```{r, eval=FALSE}
+
+library(gapminder)
+library(ggplot2)
+library(dplyr)
+
+gapminder %>% filter(year==2007) %>% 
+ggplot(aes(gdpPercap,lifeExp)) + geom_point(aes(color=continent)) + 
+  geom_smooth(se=FALSE) + 
+  labs(title="La esperanza de vida crece con la riqueza de los paises")
+```
+
+## Títulos
+
+- El propósito del título de un gráfico es resumir el hallazgo principal. 
+
+- Debemos evitar títulos que simplemente describan lo que representa  el gráfico, como por ejemplo: "Gráfico de dispersión de la esperanza de vida frente a la renta per cápita".
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE, fig.height=4}
+
+library(gapminder)
+library(ggplot2)
+library(dplyr)
+
+p <- gapminder %>% filter(year==2007) %>% 
+  ggplot(aes(gdpPercap,lifeExp)) + geom_point(aes(color=continent)) + 
+  geom_smooth(se=FALSE)  
+  
+p + labs(title="La esperanza de vida crece con la riqueza de los paises")
+```
+
+
+## Títulos
+
+Si necesitas agregar más texto, hay dos etiquetas útiles que puede utilizar en ggplot2 (a partir de la versión 2.2.0): 
+
+- `subtitle`: el subtítulo agrega detalles adicionales usando una fuente más pequeña debajo del título.
+- `caption`: añade texto en la parte inferior de la gráfica.  Se usa a menudo para especificar la fuente de los datos.
+
+```{r,eval=FALSE}
+p +  labs(title="La esperanza de vida crece con la riqueza de los paises",
+       subtitle="Año 2007",
+       caption= "Fuente: Fundación Gapminder https://www.gapminder.org/")
+
+```
+
+##
+
+```{r,echo=FALSE, fig.width=8}
+p +   labs(title="La esperanza de vida crece con la riqueza de los paises",
+       subtitle="Año 2007",
+       caption= "Fuente: Fundación Gapminder https://www.gapminder.org/")
+
+```
+
+## labs
+
+- También podemos  utilizar labs() para cambiar las etiquetas de los  ejes y los títulos de las leyendas
+
+- Es una  buena costumbre reemplazar los  nombres de variables cortas con descripciones más detalladas, e incluir las unidades.
+
+```{r,warning=FALSE, message=FALSE, eval=FALSE}
+p +  labs(title="La esperanza de vida crece con la riqueza de los paises",
+       subtitle="Año 2007",
+       caption= "Fuente: Fundación Gapminder https://www.gapminder.org/",
+       x = "Producto Interior Bruto per cápita (Dólares americanos)",
+       y = "Esperanza de vida (Años)",
+       color = "Continente")
+
+```
+
+## 
+
+```{r,warning=FALSE, message=FALSE, echo=FALSE,  fig.width=8}
+p +  labs(title="La esperanza de vida crece con la riqueza de los paises",
+       subtitle="Año 2007",
+       caption= "Fuente: Fundación Gapminder https://www.gapminder.org/",
+       x = "Producto Interior Bruto per cápita (Dólares americanos)",
+       y = "Esperanza de vida (Años)",
+       color = "Continente")
+
+```
+
+
+## Anotaciones
+
+Además de etiquetar los componentes principales del gráfico, a menudo es útil etiquetar observaciones individuales o grupos de observaciones. 
+
+- La primera herramienta que vamos a ver es `geom_text()`. 
+- Es similar a `geom_point()`, pero tiene una estética adicional: `label`. 
+- Esto hace posible agregar etiquetas textuales a los gráficos.
+
+## geom_text
+
+Podemos representar cada país por su nombre en lugar de por un punto
+
+```{r, message=FALSE, eval=FALSE}
+gapminder %>% filter(year==2007) %>% 
+ggplot(aes(gdpPercap,lifeExp)) + geom_text(aes(label=country,color=continent)) + 
+  geom_smooth(se=FALSE)
+```
+
+## geom_text
+
+```{r, message=FALSE, echo=FALSE}
+gapminder %>% filter(year==2007) %>% 
+ggplot(aes(gdpPercap,lifeExp)) + geom_text(aes(label=country,color=continent)) + 
+  geom_smooth(se=FALSE)
+```
+
+
+## geom_text
+
+Aunque resulta un poco difícil de leer debido a la gran cantidad de países representados. Podríamos limitar esta cantidad, por ejemplo escribiendo solo el nombre del país con mayor esperanza de vida en cada continente. 
+Para ello necesitamos un poco de dplyr.
+
+```{r, message=FALSE, eval=FALSE}
+gap2007 <- gapminder %>% filter(year==2007)
+
+paises_longevos <- gap2007 %>%  group_by(continent) %>% filter(row_number(desc(lifeExp)) == 1)
+
+ggplot(gap2007, aes(gdpPercap,lifeExp)) + geom_point(aes(color=continent)) +
+  geom_text(aes(label=country,color=continent),data=paises_longevos) + 
+  geom_smooth(se=FALSE)
+```
+
+## geom_text
+
+```{r, message=FALSE, echo=FALSE}
+gap2007 <- gapminder %>% filter(year==2007)
+
+paises_longevos <- gap2007 %>%  group_by(continent) %>% filter(row_number(desc(lifeExp)) == 1)
+
+ggplot(gap2007, aes(gdpPercap,lifeExp)) + geom_point(aes(color=continent)) +
+  geom_text(aes(label=country,color=continent),data=paises_longevos) + 
+  geom_smooth(se=FALSE)
+```
+
+## geom_text
+
+Aun escribiendo solo 5 etiquetas, no acaban de leerse bien los nombres de los países ya que se solapan unos con otros. 
+Mediante `geom_label()` podemos añadir texto rodeado por un recuadro. Esto mejora algo la legibilidad
+
+```{r, warning=FALSE, message=FALSE, eval=FALSE}
+# Ponemos la transparencia de las etiquetas a 0.5 para ver debajo de lo solapado
+ggplot(gap2007, aes(gdpPercap,lifeExp)) + geom_point(aes(color=continent)) +
+  geom_label(aes(label=country,color=continent),data=paises_longevos, alpha=0.5) + 
+  geom_smooth(se=FALSE)
+```
+
+## geom_text
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+# Ponemos la transparencia de las etiquetas a 0.5 para ver debajo de lo solapado
+ggplot(gap2007, aes(gdpPercap,lifeExp)) + geom_point(aes(color=continent)) +
+  geom_label(aes(label=country,color=continent),data=paises_longevos, alpha=0.5) + 
+  geom_smooth(se=FALSE)
+```
+
+## ggrepel
+
+Pero seguimos sin evitar el problema de las etiquetas solapadas. 
+
+Podemos usar el paquete ggrepel  que tiene una función que ajusta la posición de las etiquetas para que no se solapen
+
+
+```{r, warning=FALSE, message=FALSE, eval=FALSE}
+ggplot(gap2007, aes(gdpPercap,lifeExp)) + 
+  geom_point(aes(color=continent)) +
+  geom_point(aes(color=continent),size=3, shape = 1, data=paises_longevos) +
+  ggrepel::geom_label_repel(aes(label=country,color=continent),data=paises_longevos,alpha=0.7) +
+  geom_smooth(se=FALSE)
+```
+
+
+## ggrepel
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+ggplot(gap2007, aes(gdpPercap,lifeExp)) + geom_point(aes(color=continent)) +
+  geom_point(aes(color=continent),size=3, shape = 1, data=paises_longevos) +
+  ggrepel::geom_label_repel(aes(label=country,color=continent),data=paises_longevos,alpha=0.7) +
+  geom_smooth(se=FALSE)
+```
+<small>
+Date cuenta que además hemos añadido una capa nueva al gráfico, que muestra los puntos de los países seleccionados de manera resaltada.
+</small>
+
+## Anotaciones
+
+A veces simplemente queremos añadir un texto explicativo en algún lugar del interior del gráfico, pero cuyo texto no está contenido en los datos.  Para ello tenemos que crear una estructura de datos para esta anotación. Veamos un ejemplo
+
+```{r, fig.width=8, eval=FALSE}
+label <- gap2007 %>%
+  summarise(
+    lifeExp = 0.85*max(lifeExp),
+    gdpPercap = max(gdpPercap),
+    label = "Cuando los paises son suficientemente ricos\n hay otros factores que influyen más en la salud que el PIB"
+  )
+
+ggplot(gap2007, aes(gdpPercap,lifeExp)) + 
+  geom_vline(aes(xintercept=30000),size=3,color="white") +
+  geom_point(aes(color=continent)) +
+  geom_point(aes(color=continent),size=3, shape = 1, data=paises_longevos) +
+  geom_smooth(se=FALSE) + 
+#  geom_vline(aes(xintercept=30000),linetype=2,size=0.5) +
+  geom_text(aes(label = label), data = label, vjust = "top", hjust = "right")
+```
+
+## 
+
+```{r, fig.width=8, echo=FALSE}
+label <- gap2007 %>%
+  summarise(
+    lifeExp = 0.85*max(lifeExp),
+    gdpPercap = max(gdpPercap),
+    label = "Cuando los paises son suficientemente ricos\n hay otros factores que influyen más en la salud que el PIB"
+  )
+
+ggplot(gap2007, aes(gdpPercap,lifeExp)) + 
+  geom_vline(aes(xintercept=30000),size=3,color="white") +
+  geom_point(aes(color=continent)) +
+  geom_point(aes(color=continent),size=3, shape = 1, data=paises_longevos) +
+  geom_smooth(se=FALSE) + 
+#  geom_vline(aes(xintercept=30000),linetype=2,size=0.5) +
+  geom_text(aes(label = label), data = label, vjust = "top", hjust = "right")
+```
+
+
+##
+
+
+Algunas observaciones: 
+
+- Hemos creado el data.frame label para posicionar la anotación
+- Para justificar, vertical y horizontalmente,  el texto correctamente hemos usado los argumentos `vjust = "top"`, `hjust = "right"` en `geom_text()`.
+- Hemos añadido un salto manual de linea a la etiqueta mediante "\\n"
+- Hemos añadido otro elemento de anotación en el gráfico: una linea vertical mediante `geom_vline()`
+
+
+## Anotaciones 
+
+Además de `geom_text()` y `geom_label()` tenemos a disposición  otras "geoms" en ggplot2 útiles para  anotar nuestros gráficos. Algunas ideas:
+
+- Utiliza `geom_hline()` y `geom_vline()` para agregar líneas de referencia. Deben ser discretas para interferir lo menos posible con los elementos principales del gráfico. En el ejemplo he usado una linea blanca gruesa en la primera capa del gráfico. Pueden usarse tambien lineas finas y punteadas. 
+
+- Utiliza `geom_rect()` para dibujar un rectángulo alrededor de los puntos de interés. Los límites del rectángulo están definidos por la `aes(xmin, xmax, ymin, ymax)`
+
+- Utiliza `geom_segment()` con el argumento arrow para llamar la atención de un punto con una flecha. Utilice la estética x e y para definir la posición inicial y `xend` e `yend` para definir la ubicación de la punta.
+
+
+## vline, hline, rect, segment
+
+```{r, fig.height=4}
+ggplot(NULL) + 
+  geom_vline(aes(xintercept=0),color="red") + 
+  geom_hline(aes(yintercept=0),color="red",linetype=2,size=0.25) +
+  geom_rect(aes(xmin=-0.25,xmax=0.25,ymin=-0.25,ymax=0.25),fill=NA,color="blue") + 
+  geom_segment(aes(x=-0.15,y=-0.15,xend=0,yend=0), arrow =arrow(length = unit(0.05,"npc")) , color="grey50") 
+  
+```
+
+
+
+## Escalas
+
+- Otra manera de mejorar los gráficos de cara a  la comunicación es ajustar las escalas. 
+- Las escalas controlan el mapeo de valores de datos a elementos que podemos percibir. Normalmente, ggplot2 agrega automáticamente las escalas. 
+
+Por ejemplo, cuando escribimos:
+
+```{r, eval=FALSE}
+ggplot(gap2007, aes(gdpPercap,lifeExp)) + 
+  geom_point(aes(color=continent))
+```
+
+ggplot2 agrega automáticamente las escalas predeterminadas silenciosamente. Añade una escala para cada estética que añadimos al gráfico, en este caso `x`,`y` y `color`. 
+
+## Escalas
+
+El gráfico anterior es equivalente a:
+
+```{r, eval=FALSE}
+ggplot(gap2007, aes(gdpPercap,lifeExp)) + 
+  geom_point(aes(color=continent)) +
+  scale_x_continuous() +
+  scale_y_continuous() +
+  scale_colour_discrete()
+
+```
+
+
+## Escalas
+
+- Observa el esquema de nomenclatura para las funciones que controlan las escalas: 
+
+    - `scale_` seguido del nombre de la estética, seguido de `_`, y del  nombre de la escala. 
+
+- Las escalas predeterminadas se nombran según el tipo de variable con el que se asocian: continuo, discreto, fecha o fecha-hora.
+Hay un montón de escalas no predeterminadas que veremos a continuación.
+
+- Las escalas predeterminadas han sido cuidadosamente seleccionadas para funcionar bien con un rango amplio de datos de entrada. 
+Sin embargo, es posible que, en ocasiones, queramos reemplazar los valores predeterminados por dos razones:
+
+    - Es posible que queramos  modificar algunos de los parámetros de la escala predeterminada. Esto nos permite hacer cosas como cambiar las marcas en los ejes, o las etiquetas de la leyenda.
+
+    - Es posible que queramos sustituir la escala por completo, ya que en algunas ocasiones nos puede interesar una escala diferente a la por defecto. 
+
+## Escalas de  Ejes
+
+Podemos controlar las marcas y etiquetas de los ejes mediante los argumentos `breaks` y `labels` de la función `scale_` correspondiente. 
+
+Por ejemplo: marcas en eje y cada 5 años y en el eje x cada 5000 \$
+ 
+```{r, eval=FALSE}
+ggplot(gap2007, aes(gdpPercap,lifeExp)) + 
+  geom_point(aes(color=continent)) +
+  scale_x_continuous(breaks = seq(0, 50000, by = 5000)) +
+  scale_y_continuous(breaks = seq(35, 85, by = 5))
+```
+
+## 
+
+```{r, echo=FALSE}
+ggplot(gap2007, aes(gdpPercap,lifeExp)) + 
+  geom_point(aes(color=continent)) +
+  scale_x_continuous(breaks = seq(0, 50000, by = 5000)) +
+  scale_y_continuous(breaks = seq(35, 85, by = 5))
+```
+
+
+## Escalas de  Ejes
+
+Otro uso de breaks es cuando tenemos pocos puntos de datos  y queremos resaltar exactamente donde se producen las observaciones. 
+
+
+```{r, eval=FALSE}
+presidential %>%
+  mutate(id = 33 + row_number()) %>% # Creo una variable nueva para posicionar los presidentes en el eje y
+  ggplot(aes(start, id)) +
+    geom_point() +
+    geom_segment(aes(xend = end, yend = id)) +
+    geom_text(aes(y=id+0.3,label=name),size=3) +
+    scale_x_date(NULL, breaks = presidential$start, date_labels = "'%y") +
+    scale_y_discrete(NULL, labels=NULL)
+
+```
+
+## Escalas de  Ejes
+
+```{r, echo=FALSE}
+presidential %>%
+  mutate(id = 33 + row_number()) %>% # Creo una variable nueva para posicionar los presidentes en el eje y
+  ggplot(aes(start, id)) +
+    geom_point() +
+    geom_segment(aes(xend = end, yend = id)) +
+    geom_text(aes(y=id+0.3,label=name),size=3) +
+    scale_x_date(NULL, breaks = presidential$start, date_labels = "'%y") +
+    scale_y_discrete(NULL, labels=NULL)
+```
+
+
+## Escalas de  Ejes
+
+En este caso, es interesante observar como la especificación  de los  breaks y  labels para variables de fecha o fecha-hora es algo diferente a las variables numéricas:
+
+- `date_labels`: toma una especificación de formato del estilo de `format.Date` o `format.POSIXct` (teclea en la consola  `?strptime` para más información)
+
+- `date_breaks`: (no la hemos usado) admite una cadena de texto como  “2 days” o “1 month”.
+
+
+
+## Leyendas
+
+Para controlar la posición de la leyenda, debemos usar una configuración de `theme()`. 
+
+El argumento  `legend.position` controla donde se dibuja la leyenda:
+
+```{r fig.align = "default", fig.width = 4, fig.asp = 0.5, fig.show='hold', eval=FALSE}
+base <- ggplot(gap2007, aes(gdpPercap,lifeExp)) + 
+  geom_point(aes(color=continent)) 
+
+base + theme(legend.position = "left")
+base + theme(legend.position = "top")
+base + theme(legend.position = "bottom")
+base + theme(legend.position = "right") 
+```
+
+
+##
+
+```{r fig.align = "default", fig.width = 4, fig.asp = 0.75, fig.show='hold', echo=FALSE}
+base <- ggplot(gap2007, aes(gdpPercap,lifeExp)) + 
+  geom_point(aes(color=continent)) 
+
+base + theme(legend.position = "left")
+base + theme(legend.position = "top")
+base + theme(legend.position = "bottom")
+base + theme(legend.position = "right") 
+```
+
+
+## Leyendas
+
+
+- Puedes emplear `legend.position = "none"` para suprimir la leyenda del gráfico.
+
+- Para controlar los detalles visuales de cada leyenda, usaremos `guides()` junto con  `guide_legend()` o `guide_colourbar()`. 
+
+El siguiente ejemplo controla dos aspectos importantes en la leyenda: primero el número de filas en la leyenda mediante nrow y por último el tamaño de los puntos y su transparencia mediante override.aes. Esto es útil cuando hagamos gráficos con un tamaño de punto muy pequeño o con transparencia alta.
+
+```{r, eval=FALSE}
+# Prueba a hacer el gráfico comentando la última linea
+ggplot(gap2007, aes(gdpPercap,lifeExp)) + 
+  geom_point(aes(color=continent),size=1,alpha=0.5) + 
+  theme(legend.position = "bottom") +
+  guides(color = guide_legend(nrow = 2, override.aes = list(size = 3,alpha=1)))
+
+```
+
+
+
+
+
+## 
+
+```{r, echo=FALSE}
+# Prueba a hacer el gráfico comentando la última linea
+ggplot(gap2007, aes(gdpPercap,lifeExp)) + 
+  geom_point(aes(color=continent),size=1,alpha=0.5) + 
+  theme(legend.position = "bottom") +
+  guides(color = guide_legend(nrow = 2, override.aes = list(size = 3,alpha=1)))
+
+```
+
+
+## Reemplazar la escala
+
+En lugar de ajustar los detalles de una escala, es posible cambiarla por completo. 
+
+Cuando alguna variable toma valores en ordenes de magnitud muy diferentes es útil hacer una transformación logarítmica de ellos. Esto lo podemos hacer transformando directamente los datos. 
+
+```{r, eval =FALSE}
+ggplot(gap2007, aes(log10(pop),log10(gdpPercap))) + 
+  geom_point(aes(color=continent)) 
+```
+
+## 
+
+```{r, echo =FALSE}
+ggplot(gap2007, aes(log10(pop),log10(gdpPercap))) + 
+  geom_point(aes(color=continent)) 
+```
+
+
+
+## Escala Logaritmica
+
+Sin embargo, la desventaja de esta transformación es que los ejes están ahora marcados con los valores transformados, lo que hace difícil interpretar el gráfico. En lugar de realizar la transformación en los datos, podemos hacerlo con la escala. Esto es visualmente idéntico, excepto que los ejes están etiquetados en la escala de datos original.
+
+
+```{r, eval=FALSE}
+ggplot(gap2007, aes(pop,gdpPercap)) + 
+  geom_point(aes(color=continent)) +
+    scale_x_log10() + 
+  scale_y_log10()
+
+```
+
+
+## Escala Logaritmica
+
+```{r, echo=FALSE}
+ggplot(gap2007, aes(pop,gdpPercap)) + 
+  geom_point(aes(color=continent)) +
+    scale_x_log10() + 
+  scale_y_log10()
+
+```
+
+
+## Escalas de color
+
+Otra escala que habitualmente se personaliza  es el color. 
+
+- Cuando se colorea según los valores de una variable categórica, la escala de color discreta predeterminada selecciona los colores  uniformemente espaciados alrededor de la rueda de color.
+- A veces esta escala es difícil de distinguir por personas con problemas de daltonismo.
+- Una alternativa útil son las escalas que proporciona el paquete RColorBrewer que han sido afinadas manualmente de cara a mejorar la distinción de los colores. 
+
+```{r, fig.show='hold',fig.width=6, eval=FALSE}
+ggplot(gap2007, aes(gdpPercap,lifeExp)) + 
+    geom_point(aes(color=continent)) 
+
+ggplot(gap2007, aes(gdpPercap,lifeExp)) + 
+  geom_point(aes(color=continent)) +
+  scale_colour_brewer(palette = "Set1")
+  
+  
+
+```
+
+## Escalas de color
+```{r, fig.show='hold',fig.width=5, echo=FALSE}
+ggplot(gap2007, aes(gdpPercap,lifeExp)) + 
+    geom_point(aes(color=continent)) 
+
+ggplot(gap2007, aes(gdpPercap,lifeExp)) + 
+  geom_point(aes(color=continent)) +
+  scale_colour_brewer(palette = "Set1")
+  
+  
+
+```
+
+
+## Escalas de color
+
+Si solo hay unas pocas categorías podemos usar como estética de forma redundante la forma de los puntos. Esto asegura que el gráfico se puede interpretar en una impresión en blanco y negro
+
+```{r, eval=FALSE}
+ggplot(gap2007, aes(gdpPercap,lifeExp)) + 
+  geom_point(aes(color=continent,shape=continent),size=2.5) +
+  scale_colour_brewer(palette = "Set1")
+```
+
+##
+
+```{r, echo=FALSE}
+ggplot(gap2007, aes(gdpPercap,lifeExp)) + 
+  geom_point(aes(color=continent,shape=continent),size=2.5) +
+  scale_colour_brewer(palette = "Set1")
+```
+
+
+
+## Escalas de color manuales
+
+Cuando tengamos una relación predefinida entre valores y colores, utilizaremos `scale_colour_manual()`. Por ejemplo, si asignamos al partido presidencial un color, queremos usar el mapeo estándar de rojo para republicanos y azul para demócratas:
+
+
+```{r,fig.width=8, eval=FALSE}
+presidential %>%
+  mutate(id = 33 + row_number()) %>%
+  ggplot(aes(start, id, colour = party)) +
+    geom_point() +
+    geom_segment(aes(xend = end, yend = id)) +
+    geom_text(aes(y=id+0.3,label=name),size=3) +
+    scale_colour_manual(values = c(Republican = "red", Democratic = "blue"))
+    
+```
+
+## 
+
+
+```{r,fig.width=8, echo=FALSE}
+presidential %>%
+  mutate(id = 33 + row_number()) %>%
+  ggplot(aes(start, id, colour = party)) +
+    geom_point() +
+    geom_segment(aes(xend = end, yend = id)) +
+    geom_text(aes(y=id+0.3,label=name),size=3) +
+    scale_colour_manual(values = c(Republican = "red", Democratic = "blue"))
+    
+```
+
+
+
+
+## Coloreado según variable continua
+
+Cuando el coloreado se realiza usando una variable continua, es buena idea usar `scale_colour_gradient2()`.
+Eso te permite, por ejemplo, asignar  diferentes colores para valores positivos y negativos de la variable, o si deseas distinguir puntos por encima o por debajo de la media.
+
+
+```{r, eval=FALSE}
+ggplot(gap2007, aes(pop,lifeExp)) + 
+  geom_point(aes(color=gdpPercap)) +
+  scale_x_log10() + 
+  scale_colour_gradient2(low="green",mid="orange",high="red4",midpoint =20000)
+
+```
+
+
+## 
+
+```{r, echo=FALSE}
+ggplot(gap2007, aes(pop,lifeExp)) + 
+  geom_point(aes(color=gdpPercap)) +
+  scale_x_log10() + 
+  scale_colour_gradient2(low="green",mid="orange",high="red4",midpoint =20000)
+
+```
+
+
+## Zoom
+
+Hay 3 maneras de controlar los límites de un gráfico
+
+- Ajuste manual de los datos que se representan
+- Establecer los límites en cada escala
+- Configuración de xlim y ylim en `coord_cartesian()`
+
+## Zoom
+
+Para ampliar una región del gráfico, generalmente es mejor utilizar `coord_cartesian()`. Compara las siguientes gráficos:
+
+```{r fig.asp = 1, fig.align = "default", fig.width = 2.8, fig.show='hold', eval=FALSE}
+
+ggplot(gap2007, aes(gdpPercap,lifeExp)) + 
+  geom_point() + geom_smooth() + 
+  coord_cartesian(xlim = c(0, 5000))
+
+ggplot(gap2007, aes(gdpPercap,lifeExp)) + 
+  geom_point() + geom_smooth() + 
+  scale_x_continuous(limits = c(0, 5000))
+
+gap2007 %>% filter(gdpPercap<5000) %>% 
+ggplot(aes(gdpPercap,lifeExp)) + 
+  geom_point() + geom_smooth() 
+```
+
+
+## 
+
+```{r fig.asp = 1, fig.align = "default", fig.width = 2.8, fig.show='hold', echo=FALSE}
+
+ggplot(gap2007, aes(gdpPercap,lifeExp)) + 
+  geom_point() + geom_smooth() + 
+  coord_cartesian(xlim = c(0, 5000))
+
+ggplot(gap2007, aes(gdpPercap,lifeExp)) + 
+  geom_point() + geom_smooth() + 
+  scale_x_continuous(limits = c(0, 5000))
+
+gap2007 %>% filter(gdpPercap<5000) %>% 
+ggplot(aes(gdpPercap,lifeExp)) + 
+  geom_point() + geom_smooth() 
+```
+
+
+
+## Temas
+
+Finalmente, podemos personalizar los elementos del gráfico no relacionados con los datos mediante un tema. Por ejemplo el siguiente gráfico usa el tema bw, que sustituye el habitual fondo gris por uno blanco.
+
+```{r, warning=FALSE,message=FALSE, eval=FALSE}
+ggplot(gap2007, aes(gdpPercap,lifeExp)) + 
+  geom_point(aes(color=continent)) + geom_smooth(se=FALSE) +
+  theme_bw()
+
+```
+
+## 
+
+```{r, warning=FALSE,message=FALSE, echo=FALSE}
+ggplot(gap2007, aes(gdpPercap,lifeExp)) + 
+  geom_point(aes(color=continent)) + geom_smooth(se=FALSE) +
+  theme_bw()
+
+```
+
+
+## Temas
+
+<center>
+```{r, out.width = "600px", echo=FALSE}
+knitr::include_graphics("img/visualization-themes.png")
+```
+</center>
+
+<!--
+![Temas incluidos en el paquete ggplot2](img/visualization-themes.png)
+-->
+
+
+## Temas
+
+Hay otras características de apariencia del gráfico que pueden cambiarse mediante argumentos de la función `theme()`
+Una modificación muy habitual es cambiar la orientación de las etiquetas del eje x cuando corresponden a una variable categórica
+
+
+```{r, eval=FALSE}
+gap2007 %>% sample_n(20) %>% 
+ggplot() + geom_bar(aes(reorder(country,lifeExp),lifeExp,fill=continent),stat="identity") + 
+  theme_bw() + theme(legend.position = 'none', axis.text.x = element_text(angle=60,hjust=1,size=8))+
+  labs(x="")
+```
+
+
+## 
+
+```{r, echo=FALSE}
+gap2007 %>% sample_n(20) %>% 
+ggplot() + geom_bar(aes(reorder(country,lifeExp),lifeExp,fill=continent),stat="identity") + 
+  theme_bw() + theme(legend.position = 'none', axis.text.x = element_text(angle=90,size=8))+
+  labs(x="")
+```
+
+
+
+
+
