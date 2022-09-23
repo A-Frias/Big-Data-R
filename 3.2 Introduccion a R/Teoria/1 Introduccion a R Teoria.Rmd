@@ -74,6 +74,9 @@ Para ver paso a paso el proceso de instalación de R hay un vídeo disponible en
 R también está disponible en otros sistemas operativos como Mac OS  y Linux.
 
 
+ESTO ES UN CAMBIO INTRUDUCIDO EN UN NUEVO BRANCH DE GITHUB PARA VER COMO FUNCIONA
+
+
 ### Descargar R
 
 - Ir al sitio web principal de R <http://www.r-project.org>
